@@ -6,3 +6,5 @@ config/config.local.json
 backups/
 *.erenc
 .DS_Store
+dist/
+deploy/
