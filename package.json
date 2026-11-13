@@ -1,0 +1,14 @@
+{
+  "name": "easy-record",
+  "version": "5.0.0-beta.19",
+  "private": true,
+  "description": "Easy Record v4 - work, payments and clients tracker",
+  "scripts": {
+    "build": "node build.js",
+    "test": "node tests/run-tests.js dist/index.html && node tests/extra-tests.js dist/index.html && node tests/auth-tests.js dist/index.html && node tests/sb-sync-tests.js dist/index.html && node tests/native-tests.js dist/index.html && node tests/pwa-tests.js deploy"
+  },
+  "devDependencies": {
+    "puppeteer": "^22.0.0",
+    "jszip": "^3.10.1"
+  }
+}

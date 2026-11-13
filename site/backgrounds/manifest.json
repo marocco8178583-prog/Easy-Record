@@ -1,0 +1,802 @@
+[
+  {
+    "file": "backgrounds/cities/01-new-york-sunset-landscape.webp",
+    "category": "cities",
+    "source_scene": 1,
+    "variant": "landscape",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/cities/01-new-york-sunset-portrait.webp",
+    "category": "cities",
+    "source_scene": 1,
+    "variant": "portrait",
+    "width": 720,
+    "height": 1280
+  },
+  {
+    "file": "backgrounds/cities/01-new-york-sunset-square.webp",
+    "category": "cities",
+    "source_scene": 1,
+    "variant": "square",
+    "width": 1080,
+    "height": 1080
+  },
+  {
+    "file": "backgrounds/cities/01-new-york-sunset-warm.webp",
+    "category": "cities",
+    "source_scene": 1,
+    "variant": "warm",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/cities/01-new-york-sunset-cool.webp",
+    "category": "cities",
+    "source_scene": 1,
+    "variant": "cool",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/animals/02-humpback-whale-landscape.webp",
+    "category": "animals",
+    "source_scene": 2,
+    "variant": "landscape",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/animals/02-humpback-whale-portrait.webp",
+    "category": "animals",
+    "source_scene": 2,
+    "variant": "portrait",
+    "width": 720,
+    "height": 1280
+  },
+  {
+    "file": "backgrounds/animals/02-humpback-whale-square.webp",
+    "category": "animals",
+    "source_scene": 2,
+    "variant": "square",
+    "width": 1080,
+    "height": 1080
+  },
+  {
+    "file": "backgrounds/animals/02-humpback-whale-warm.webp",
+    "category": "animals",
+    "source_scene": 2,
+    "variant": "warm",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/animals/02-humpback-whale-cool.webp",
+    "category": "animals",
+    "source_scene": 2,
+    "variant": "cool",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/animals/03-red-fox-landscape.webp",
+    "category": "animals",
+    "source_scene": 3,
+    "variant": "landscape",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/animals/03-red-fox-portrait.webp",
+    "category": "animals",
+    "source_scene": 3,
+    "variant": "portrait",
+    "width": 720,
+    "height": 1280
+  },
+  {
+    "file": "backgrounds/animals/03-red-fox-square.webp",
+    "category": "animals",
+    "source_scene": 3,
+    "variant": "square",
+    "width": 1080,
+    "height": 1080
+  },
+  {
+    "file": "backgrounds/animals/03-red-fox-warm.webp",
+    "category": "animals",
+    "source_scene": 3,
+    "variant": "warm",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/animals/03-red-fox-cool.webp",
+    "category": "animals",
+    "source_scene": 3,
+    "variant": "cool",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/animals/04-lion-landscape.webp",
+    "category": "animals",
+    "source_scene": 4,
+    "variant": "landscape",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/animals/04-lion-portrait.webp",
+    "category": "animals",
+    "source_scene": 4,
+    "variant": "portrait",
+    "width": 720,
+    "height": 1280
+  },
+  {
+    "file": "backgrounds/animals/04-lion-square.webp",
+    "category": "animals",
+    "source_scene": 4,
+    "variant": "square",
+    "width": 1080,
+    "height": 1080
+  },
+  {
+    "file": "backgrounds/animals/04-lion-warm.webp",
+    "category": "animals",
+    "source_scene": 4,
+    "variant": "warm",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/animals/04-lion-cool.webp",
+    "category": "animals",
+    "source_scene": 4,
+    "variant": "cool",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/05-ocean-sunset-landscape.webp",
+    "category": "nature",
+    "source_scene": 5,
+    "variant": "landscape",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/05-ocean-sunset-portrait.webp",
+    "category": "nature",
+    "source_scene": 5,
+    "variant": "portrait",
+    "width": 720,
+    "height": 1280
+  },
+  {
+    "file": "backgrounds/nature/05-ocean-sunset-square.webp",
+    "category": "nature",
+    "source_scene": 5,
+    "variant": "square",
+    "width": 1080,
+    "height": 1080
+  },
+  {
+    "file": "backgrounds/nature/05-ocean-sunset-warm.webp",
+    "category": "nature",
+    "source_scene": 5,
+    "variant": "warm",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/05-ocean-sunset-cool.webp",
+    "category": "nature",
+    "source_scene": 5,
+    "variant": "cool",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/06-tropical-beach-landscape.webp",
+    "category": "nature",
+    "source_scene": 6,
+    "variant": "landscape",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/06-tropical-beach-portrait.webp",
+    "category": "nature",
+    "source_scene": 6,
+    "variant": "portrait",
+    "width": 720,
+    "height": 1280
+  },
+  {
+    "file": "backgrounds/nature/06-tropical-beach-square.webp",
+    "category": "nature",
+    "source_scene": 6,
+    "variant": "square",
+    "width": 1080,
+    "height": 1080
+  },
+  {
+    "file": "backgrounds/nature/06-tropical-beach-warm.webp",
+    "category": "nature",
+    "source_scene": 6,
+    "variant": "warm",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/06-tropical-beach-cool.webp",
+    "category": "nature",
+    "source_scene": 6,
+    "variant": "cool",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/07-mountain-lake-landscape.webp",
+    "category": "nature",
+    "source_scene": 7,
+    "variant": "landscape",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/07-mountain-lake-portrait.webp",
+    "category": "nature",
+    "source_scene": 7,
+    "variant": "portrait",
+    "width": 720,
+    "height": 1280
+  },
+  {
+    "file": "backgrounds/nature/07-mountain-lake-square.webp",
+    "category": "nature",
+    "source_scene": 7,
+    "variant": "square",
+    "width": 1080,
+    "height": 1080
+  },
+  {
+    "file": "backgrounds/nature/07-mountain-lake-warm.webp",
+    "category": "nature",
+    "source_scene": 7,
+    "variant": "warm",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/07-mountain-lake-cool.webp",
+    "category": "nature",
+    "source_scene": 7,
+    "variant": "cool",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/08-waterfall-landscape.webp",
+    "category": "nature",
+    "source_scene": 8,
+    "variant": "landscape",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/08-waterfall-portrait.webp",
+    "category": "nature",
+    "source_scene": 8,
+    "variant": "portrait",
+    "width": 720,
+    "height": 1280
+  },
+  {
+    "file": "backgrounds/nature/08-waterfall-square.webp",
+    "category": "nature",
+    "source_scene": 8,
+    "variant": "square",
+    "width": 1080,
+    "height": 1080
+  },
+  {
+    "file": "backgrounds/nature/08-waterfall-warm.webp",
+    "category": "nature",
+    "source_scene": 8,
+    "variant": "warm",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/08-waterfall-cool.webp",
+    "category": "nature",
+    "source_scene": 8,
+    "variant": "cool",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/09-deer-landscape.webp",
+    "category": "nature",
+    "source_scene": 9,
+    "variant": "landscape",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/09-deer-portrait.webp",
+    "category": "nature",
+    "source_scene": 9,
+    "variant": "portrait",
+    "width": 720,
+    "height": 1280
+  },
+  {
+    "file": "backgrounds/nature/09-deer-square.webp",
+    "category": "nature",
+    "source_scene": 9,
+    "variant": "square",
+    "width": 1080,
+    "height": 1080
+  },
+  {
+    "file": "backgrounds/nature/09-deer-warm.webp",
+    "category": "nature",
+    "source_scene": 9,
+    "variant": "warm",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/09-deer-cool.webp",
+    "category": "nature",
+    "source_scene": 9,
+    "variant": "cool",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/10-lion-landscape.webp",
+    "category": "nature",
+    "source_scene": 10,
+    "variant": "landscape",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/10-lion-portrait.webp",
+    "category": "nature",
+    "source_scene": 10,
+    "variant": "portrait",
+    "width": 720,
+    "height": 1280
+  },
+  {
+    "file": "backgrounds/nature/10-lion-square.webp",
+    "category": "nature",
+    "source_scene": 10,
+    "variant": "square",
+    "width": 1080,
+    "height": 1080
+  },
+  {
+    "file": "backgrounds/nature/10-lion-warm.webp",
+    "category": "nature",
+    "source_scene": 10,
+    "variant": "warm",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/10-lion-cool.webp",
+    "category": "nature",
+    "source_scene": 10,
+    "variant": "cool",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/11-parrots-landscape.webp",
+    "category": "nature",
+    "source_scene": 11,
+    "variant": "landscape",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/11-parrots-portrait.webp",
+    "category": "nature",
+    "source_scene": 11,
+    "variant": "portrait",
+    "width": 720,
+    "height": 1280
+  },
+  {
+    "file": "backgrounds/nature/11-parrots-square.webp",
+    "category": "nature",
+    "source_scene": 11,
+    "variant": "square",
+    "width": 1080,
+    "height": 1080
+  },
+  {
+    "file": "backgrounds/nature/11-parrots-warm.webp",
+    "category": "nature",
+    "source_scene": 11,
+    "variant": "warm",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/11-parrots-cool.webp",
+    "category": "nature",
+    "source_scene": 11,
+    "variant": "cool",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/12-dolphins-landscape.webp",
+    "category": "nature",
+    "source_scene": 12,
+    "variant": "landscape",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/12-dolphins-portrait.webp",
+    "category": "nature",
+    "source_scene": 12,
+    "variant": "portrait",
+    "width": 720,
+    "height": 1280
+  },
+  {
+    "file": "backgrounds/nature/12-dolphins-square.webp",
+    "category": "nature",
+    "source_scene": 12,
+    "variant": "square",
+    "width": 1080,
+    "height": 1080
+  },
+  {
+    "file": "backgrounds/nature/12-dolphins-warm.webp",
+    "category": "nature",
+    "source_scene": 12,
+    "variant": "warm",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/12-dolphins-cool.webp",
+    "category": "nature",
+    "source_scene": 12,
+    "variant": "cool",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/13-lavender-landscape.webp",
+    "category": "nature",
+    "source_scene": 13,
+    "variant": "landscape",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/13-lavender-portrait.webp",
+    "category": "nature",
+    "source_scene": 13,
+    "variant": "portrait",
+    "width": 720,
+    "height": 1280
+  },
+  {
+    "file": "backgrounds/nature/13-lavender-square.webp",
+    "category": "nature",
+    "source_scene": 13,
+    "variant": "square",
+    "width": 1080,
+    "height": 1080
+  },
+  {
+    "file": "backgrounds/nature/13-lavender-warm.webp",
+    "category": "nature",
+    "source_scene": 13,
+    "variant": "warm",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/13-lavender-cool.webp",
+    "category": "nature",
+    "source_scene": 13,
+    "variant": "cool",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/14-autumn-forest-landscape.webp",
+    "category": "nature",
+    "source_scene": 14,
+    "variant": "landscape",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/14-autumn-forest-portrait.webp",
+    "category": "nature",
+    "source_scene": 14,
+    "variant": "portrait",
+    "width": 720,
+    "height": 1280
+  },
+  {
+    "file": "backgrounds/nature/14-autumn-forest-square.webp",
+    "category": "nature",
+    "source_scene": 14,
+    "variant": "square",
+    "width": 1080,
+    "height": 1080
+  },
+  {
+    "file": "backgrounds/nature/14-autumn-forest-warm.webp",
+    "category": "nature",
+    "source_scene": 14,
+    "variant": "warm",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/14-autumn-forest-cool.webp",
+    "category": "nature",
+    "source_scene": 14,
+    "variant": "cool",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/15-snow-forest-landscape.webp",
+    "category": "nature",
+    "source_scene": 15,
+    "variant": "landscape",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/15-snow-forest-portrait.webp",
+    "category": "nature",
+    "source_scene": 15,
+    "variant": "portrait",
+    "width": 720,
+    "height": 1280
+  },
+  {
+    "file": "backgrounds/nature/15-snow-forest-square.webp",
+    "category": "nature",
+    "source_scene": 15,
+    "variant": "square",
+    "width": 1080,
+    "height": 1080
+  },
+  {
+    "file": "backgrounds/nature/15-snow-forest-warm.webp",
+    "category": "nature",
+    "source_scene": 15,
+    "variant": "warm",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/15-snow-forest-cool.webp",
+    "category": "nature",
+    "source_scene": 15,
+    "variant": "cool",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/16-river-landscape.webp",
+    "category": "nature",
+    "source_scene": 16,
+    "variant": "landscape",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/16-river-portrait.webp",
+    "category": "nature",
+    "source_scene": 16,
+    "variant": "portrait",
+    "width": 720,
+    "height": 1280
+  },
+  {
+    "file": "backgrounds/nature/16-river-square.webp",
+    "category": "nature",
+    "source_scene": 16,
+    "variant": "square",
+    "width": 1080,
+    "height": 1080
+  },
+  {
+    "file": "backgrounds/nature/16-river-warm.webp",
+    "category": "nature",
+    "source_scene": 16,
+    "variant": "warm",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/16-river-cool.webp",
+    "category": "nature",
+    "source_scene": 16,
+    "variant": "cool",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/cities/17-new-york-blue-hour-landscape.webp",
+    "category": "cities",
+    "source_scene": 17,
+    "variant": "landscape",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/cities/17-new-york-blue-hour-portrait.webp",
+    "category": "cities",
+    "source_scene": 17,
+    "variant": "portrait",
+    "width": 720,
+    "height": 1280
+  },
+  {
+    "file": "backgrounds/cities/17-new-york-blue-hour-square.webp",
+    "category": "cities",
+    "source_scene": 17,
+    "variant": "square",
+    "width": 1080,
+    "height": 1080
+  },
+  {
+    "file": "backgrounds/cities/17-new-york-blue-hour-warm.webp",
+    "category": "cities",
+    "source_scene": 17,
+    "variant": "warm",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/cities/17-new-york-blue-hour-cool.webp",
+    "category": "cities",
+    "source_scene": 17,
+    "variant": "cool",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/animals/18-fox-autumn-landscape.webp",
+    "category": "animals",
+    "source_scene": 18,
+    "variant": "landscape",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/animals/18-fox-autumn-portrait.webp",
+    "category": "animals",
+    "source_scene": 18,
+    "variant": "portrait",
+    "width": 720,
+    "height": 1280
+  },
+  {
+    "file": "backgrounds/animals/18-fox-autumn-square.webp",
+    "category": "animals",
+    "source_scene": 18,
+    "variant": "square",
+    "width": 1080,
+    "height": 1080
+  },
+  {
+    "file": "backgrounds/animals/18-fox-autumn-warm.webp",
+    "category": "animals",
+    "source_scene": 18,
+    "variant": "warm",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/animals/18-fox-autumn-cool.webp",
+    "category": "animals",
+    "source_scene": 18,
+    "variant": "cool",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/animals/19-lion-sunrise-landscape.webp",
+    "category": "animals",
+    "source_scene": 19,
+    "variant": "landscape",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/animals/19-lion-sunrise-portrait.webp",
+    "category": "animals",
+    "source_scene": 19,
+    "variant": "portrait",
+    "width": 720,
+    "height": 1280
+  },
+  {
+    "file": "backgrounds/animals/19-lion-sunrise-square.webp",
+    "category": "animals",
+    "source_scene": 19,
+    "variant": "square",
+    "width": 1080,
+    "height": 1080
+  },
+  {
+    "file": "backgrounds/animals/19-lion-sunrise-warm.webp",
+    "category": "animals",
+    "source_scene": 19,
+    "variant": "warm",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/animals/19-lion-sunrise-cool.webp",
+    "category": "animals",
+    "source_scene": 19,
+    "variant": "cool",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/20-tropical-sunset-landscape.webp",
+    "category": "nature",
+    "source_scene": 20,
+    "variant": "landscape",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/20-tropical-sunset-portrait.webp",
+    "category": "nature",
+    "source_scene": 20,
+    "variant": "portrait",
+    "width": 720,
+    "height": 1280
+  },
+  {
+    "file": "backgrounds/nature/20-tropical-sunset-square.webp",
+    "category": "nature",
+    "source_scene": 20,
+    "variant": "square",
+    "width": 1080,
+    "height": 1080
+  },
+  {
+    "file": "backgrounds/nature/20-tropical-sunset-warm.webp",
+    "category": "nature",
+    "source_scene": 20,
+    "variant": "warm",
+    "width": 1280,
+    "height": 720
+  },
+  {
+    "file": "backgrounds/nature/20-tropical-sunset-cool.webp",
+    "category": "nature",
+    "source_scene": 20,
+    "variant": "cool",
+    "width": 1280,
+    "height": 720
+  }
+]

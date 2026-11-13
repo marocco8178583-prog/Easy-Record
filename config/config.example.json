@@ -1,0 +1,12 @@
+{
+  "_comment": "Example only. Never put secrets (service_role keys, passwords) in this file or in client code.",
+  "cloud": {
+    "provider": "claude-shared-db",
+    "note": "current sync uses the db capability of the Claude Artifacts runtime"
+  },
+  "future": {
+    "provider": "supabase",
+    "url": "https://YOUR-PROJECT.supabase.co",
+    "anonKey": "PUBLIC-ANON-KEY-ONLY"
+  }
+}

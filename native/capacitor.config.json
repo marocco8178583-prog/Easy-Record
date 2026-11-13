@@ -1,0 +1,13 @@
+{
+  "appId": "com.easyrecord.app",
+  "appName": "Easy Record",
+  "webDir": "www",
+  "server": { "androidScheme": "https" },
+  "android": { "allowMixedContent": false },
+  "ios": { "contentInset": "never" },
+  "plugins": {
+    "SplashScreen": { "launchShowDuration": 600, "backgroundColor": "#12302d", "showSpinner": false },
+    "Keyboard": { "resize": "body", "resizeOnFullScreen": true },
+    "LocalNotifications": { "smallIcon": "ic_stat_icon", "iconColor": "#f28c28" }
+  }
+}

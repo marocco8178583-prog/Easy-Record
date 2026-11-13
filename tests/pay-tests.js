@@ -1,0 +1,21 @@
+/* overtime tiers + Shabbat rate (hourly clock sessions only) */
+const {chromium}=require('playwright'),path=require('path');(async()=>{const b=await chromium.launch();const p=await b.newPage();
+await p.goto('file://'+path.join(__dirname,'..','dist','index.html'));await p.waitForTimeout(700);
+const r=await p.evaluate(()=>{const T=(y,m,d,h)=>new Date(y,m-1,d,h).getTime(),R=[];const ok=(n,c,d)=>R.push([n,!!c,d]);
+ const pay=s=>sesPay(Object.assign({rate:100,br:[],bp:false},s)).pay;
+ S.otOn=false;S.shOn=false;ok('כבוי: 12 שעות × 100 = 1200',pay({t0:T(2026,11,10,7),t1:T(2026,11,10,19)})===1200);
+ S.otOn=true;S.otAfter=8;S.otAfter2=10;S.otM1=1.25;S.otM2=1.5;
+ ok('8 שעות בלי תוספת',pay({t0:T(2026,11,10,7),t1:T(2026,11,10,15)})===800);
+ ok('10 שעות: 2 שעות ב-125%',pay({t0:T(2026,11,10,7),t1:T(2026,11,10,17)})===1050);
+ ok('12 שעות: 2 ב-125% ו-2 ב-150%',pay({t0:T(2026,11,10,7),t1:T(2026,11,10,19)})===1350);
+ ok('הפסקה ללא תשלום לא נספרת לשעות הנוספות',pay({t0:T(2026,11,10,7),t1:T(2026,11,10,20),br:[{a:T(2026,11,10,12),b:T(2026,11,10,13)}]})===1350);
+ S.shOn=true;S.shM=2;S.shF='18:00';S.shT='19:00';
+ ok('שבת: 6 שעות ב-200%',pay({t0:T(2026,11,14,8),t1:T(2026,11,14,14)})===1200);
+ ok('שישי 16–20: שעתיים רגילות ושעתיים שבת',pay({t0:T(2026,11,13,16),t1:T(2026,11,13,20)})===600);
+ ok('מוצ״ש 17–21: שעתיים שבת ושעתיים רגילות',pay({t0:T(2026,11,14,17),t1:T(2026,11,14,21)})===600);
+ ok('שעה נוספת בשבת: התעריף הגבוה, בלי חיבור',pay({t0:T(2026,11,14,7),t1:T(2026,11,14,19)})===2400);
+ S.otM2=2.5;ok('מדרגה גבוהה משבת גוברת',pay({t0:T(2026,11,14,7),t1:T(2026,11,14,19)})===2500);S.otM2=1.5;
+ const d=entryFromSes({id:'x',cid:0,t0:T(2026,11,14,8),t1:T(2026,11,14,20),br:[],basis:'day',rate:600},{});ok('שכר יומי לא מושפע משבת ושעות נוספות',d.amount===600&&!d.ot&&!d.sh,JSON.stringify(d));
+ const h=entryFromSes({id:'y',cid:0,t0:T(2026,11,13,12),t1:T(2026,11,13,22),br:[],basis:'hour',rate:50},{});ok('יום עבודה שעתי שומר סכום, שעות נוספות ושעות שבת',h.amount===700&&h.ot===2&&h.sh===4,JSON.stringify([h.amount,h.ot,h.sh]));
+ return R});
+let f=0;r.forEach(x=>{console.log((x[1]?'PASS ':'FAIL ')+x[0]+(x[1]?'':'  -> '+x[2]));if(!x[1])f++});console.log((r.length-f)+'/'+r.length+' passed');await b.close();process.exit(f?1:0)})();
