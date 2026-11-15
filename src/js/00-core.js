@@ -1,10 +1,13 @@
-var APP_VER='5.0.0-beta.23',KEY='er4-v3',LEGACY_KEY='workdays-v1',SCHEMA=3,NOSAVE=false,MIGERR='',S=null,tab='clock',filt='unpaid',OP={},selD,cal;
+var APP_VER='5.0.0-beta.24',KEY='er4-v3',LEGACY_KEY='workdays-v1',SCHEMA=3,NOSAVE=false,MIGERR='',S=null,tab='clock',filt='unpaid',OP={},selD,cal;
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S||!S.entries){try{S=JSON.parse(localStorage.getItem(LEGACY_KEY))}catch(e){S=null}}
 if(!S||!S.entries)S={rate:600,entries:[],clients:[]};
 function $(i){return document.getElementById(i)}
 function uid(){return Date.now()*1000+Math.floor(Math.random()*1000)}
-function ensureCids(o){o.clients=o.clients||[];(o.entries||[]).forEach(function(e){if(!e.cid){var n=e.client||'',c=o.clients.find(function(x){return x.name===n});
+/* damaged saved data (e.g. a list that is not a list) must never stop the app: bad parts are replaced by empty ones, and the original text is kept aside (never deleted) */
+function sanitizeState(o){if(!o||typeof o!=='object')return o;var bad=false;['entries','clients','pays','sessions','debts','expenses','projects','tasks'].forEach(function(k){if(o[k]!=null&&!Array.isArray(o[k])){bad=true;o[k]=[]}else if(Array.isArray(o[k])){var n=o[k].length;o[k]=o[k].filter(function(x){return x&&typeof x==='object'});if(o[k].length!==n)bad=true}});
+  ['tomb','conf'].forEach(function(k){if(o[k]!=null&&(typeof o[k]!=='object'||Array.isArray(o[k]))){bad=true;o[k]={}}});if(bad){try{localStorage.setItem('er-damaged-'+Date.now(),JSON.stringify(o).slice(0,500000))}catch(e){}}return o}
+function ensureCids(o){sanitizeState(o);o.clients=o.clients||[];(o.entries||[]).forEach(function(e){if(!e.cid){var n=e.client||'',c=o.clients.find(function(x){return x.name===n});
   if(!c){c={id:uid(),name:n,phone:''};o.clients.push(c)}if(e.phone&&!c.phone)c.phone=e.phone;e.cid=c.id}})}
 function migrate(){ensureCids(S)}
 migrate();

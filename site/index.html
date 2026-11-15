@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Easy Record · יומן שכר</title>
-<link rel="icon" type="image/png" href="icons/favicon-48.png?v=5.0.0-beta.23">
+<link rel="icon" type="image/png" href="icons/favicon-48.png?v=5.0.0-beta.24">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Easy Record">
 <meta name="theme-color" content="#12302d">
 <script src="config.js" onerror="void 0"></script>
-<link rel="manifest" href="manifest.webmanifest?v=5.0.0-beta.23">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=5.0.0-beta.23">
+<link rel="manifest" href="manifest.webmanifest?v=5.0.0-beta.24">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=5.0.0-beta.24">
 <script>
 /*!
 
@@ -79,7 +79,7 @@ nav button.on{color:var(--ink);background:var(--bg)}
 
 /* ---- round time clock ---- */
 button,.btn{min-height:44px;border-radius:14px}
-.ckwrap{position:relative;width:min(76vw,300px);aspect-ratio:1;margin:6px auto 14px}
+.ckwrap{position:relative;width:min(76%,300px);aspect-ratio:1;margin:6px auto 14px}
 .ckring{width:100%;height:100%;transform:rotate(-90deg)}
 .ckt{fill:none;stroke:var(--line);stroke-width:12}
 .ckp{fill:none;stroke:var(--ok);stroke-width:12;stroke-linecap:round;stroke-dasharray:603.2;stroke-dashoffset:603.2;transition:stroke-dashoffset 1s linear,stroke .4s}
@@ -210,6 +210,11 @@ img.logoI{border-radius:22%;display:block;box-shadow:0 4px 14px rgba(0,0,0,.25)}
 .gbox img.logoI{margin:0 auto 6px}
 .sndT{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}.sndT button{flex:1 1 44%;min-width:0;padding:8px 6px;font-size:.9rem}
 input[type=range]{accent-color:var(--brand);height:28px}
+/* narrow phones / large text: nothing may push the page wider than the screen */
+.two>div{min-width:0}.two input,.two select{min-width:0;max-width:100%}
+.brand{min-width:0}.brand>span{min-width:0}.brand b{font-size:clamp(20px,6.4vw,26px)}
+.brand #syn{min-width:0;max-width:34%;overflow-wrap:anywhere}
+input[type=date],input[type=time]{min-width:0;max-width:100%}
 </style>
 </head>
 <body>
@@ -457,13 +462,16 @@ input[type=range]{accent-color:var(--brand);height:28px}
 </nav>
 <script>
 /* ===== module: 00-core.js ===== */
-var APP_VER='5.0.0-beta.23',KEY='er4-v3',LEGACY_KEY='workdays-v1',SCHEMA=3,NOSAVE=false,MIGERR='',S=null,tab='clock',filt='unpaid',OP={},selD,cal;
+var APP_VER='5.0.0-beta.24',KEY='er4-v3',LEGACY_KEY='workdays-v1',SCHEMA=3,NOSAVE=false,MIGERR='',S=null,tab='clock',filt='unpaid',OP={},selD,cal;
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S||!S.entries){try{S=JSON.parse(localStorage.getItem(LEGACY_KEY))}catch(e){S=null}}
 if(!S||!S.entries)S={rate:600,entries:[],clients:[]};
 function $(i){return document.getElementById(i)}
 function uid(){return Date.now()*1000+Math.floor(Math.random()*1000)}
-function ensureCids(o){o.clients=o.clients||[];(o.entries||[]).forEach(function(e){if(!e.cid){var n=e.client||'',c=o.clients.find(function(x){return x.name===n});
+/* damaged saved data (e.g. a list that is not a list) must never stop the app: bad parts are replaced by empty ones, and the original text is kept aside (never deleted) */
+function sanitizeState(o){if(!o||typeof o!=='object')return o;var bad=false;['entries','clients','pays','sessions','debts','expenses','projects','tasks'].forEach(function(k){if(o[k]!=null&&!Array.isArray(o[k])){bad=true;o[k]=[]}else if(Array.isArray(o[k])){var n=o[k].length;o[k]=o[k].filter(function(x){return x&&typeof x==='object'});if(o[k].length!==n)bad=true}});
+  ['tomb','conf'].forEach(function(k){if(o[k]!=null&&(typeof o[k]!=='object'||Array.isArray(o[k]))){bad=true;o[k]={}}});if(bad){try{localStorage.setItem('er-damaged-'+Date.now(),JSON.stringify(o).slice(0,500000))}catch(e){}}return o}
+function ensureCids(o){sanitizeState(o);o.clients=o.clients||[];(o.entries||[]).forEach(function(e){if(!e.cid){var n=e.client||'',c=o.clients.find(function(x){return x.name===n});
   if(!c){c={id:uid(),name:n,phone:''};o.clients.push(c)}if(e.phone&&!c.phone)c.phone=e.phone;e.cid=c.id}})}
 function migrate(){ensureCids(S)}
 migrate();
@@ -557,7 +565,7 @@ function validateMig(o,r){var A=function(a,k){return r2(a.reduce(function(s,x){r
   var cl={};ents.forEach(function(e){cl[e.cid]=r2((cl[e.cid]||0)+(+e.amount||0))});var cn={};r.entries.forEach(function(e){cn[e.cid]=r2((cn[e.cid]||0)+(+e.amount||0))});
   for(var k in cl)if(Math.abs(cl[k]-(cn[k]||0))>0.01)return {ok:false,msg:'סכום ללקוח '+k+' לא תואם'};
   return {ok:true,oldAmt:oldAmt,oldPaid:oldPaid,count:ents.length,merged:Object.keys(r.idmap).length}}
-function bootMigrate(){S.pays=S.pays||[];S.sessions=S.sessions||[];S.debts=S.debts||[];S.expenses=S.expenses||[];S.projects=S.projects||[];S.tasks=S.tasks||[];S.tomb=S.tomb||{};S.conf=S.conf||{};if(S.schema===SCHEMA)return;
+function bootMigrate(){sanitizeState(S);S.pays=S.pays||[];S.sessions=S.sessions||[];S.debts=S.debts||[];S.expenses=S.expenses||[];S.projects=S.projects||[];S.tasks=S.tasks||[];S.tomb=S.tomb||{};S.conf=S.conf||{};if(S.schema===SCHEMA)return;
   try{var raw=localStorage.getItem(LEGACY_KEY);if(raw&&!localStorage.getItem('er4-premig-backup'))localStorage.setItem('er4-premig-backup',raw)}catch(e){}
   var old=JSON.parse(JSON.stringify(S));
   try{var r=legacyToV3(S),v=validateMig(S,r);if(!v.ok)throw new Error(v.msg);

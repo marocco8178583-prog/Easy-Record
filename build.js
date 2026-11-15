@@ -28,7 +28,7 @@ fs.writeFileSync(path.join(dist,'sw.js'),fs.readFileSync(path.join(src,'pwa','sw
 if(pack.length){fs.rmSync(path.join(dist,'backgrounds'),{recursive:true,force:true});copyDir(packDir,path.join(dist,'backgrounds'))}
 // deploy/: exactly what Netlify needs, nothing else
 const dep=path.join(root,'deploy');fs.rmSync(dep,{recursive:true,force:true});fs.mkdirSync(path.join(dep,'icons'),{recursive:true});
-for(const f of ['index.html','sw.js','manifest.webmanifest','netlify.toml','config.js','privacy.html','terms.html'])fs.copyFileSync(path.join(dist,f),path.join(dep,f));
+for(const f of ['index.html','sw.js','manifest.webmanifest','netlify.toml','config.js','privacy.html','terms.html'])fs.copyFileSync(path.join(dist,f),path.join(dep,f));fs.copyFileSync(path.join(src,'pwa','_headers'),path.join(dep,'_headers'));
 for(const f of fs.readdirSync(icons))fs.copyFileSync(path.join(icons,f),path.join(dep,'icons',f));
 if(pack.length)copyDir(path.join(dist,'backgrounds'),path.join(dep,'backgrounds'));
 console.log('built dist/ and deploy/ v'+VERSION,html.length,'bytes from',files.length,'modules');

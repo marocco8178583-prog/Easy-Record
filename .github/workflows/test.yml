@@ -1,14 +1,20 @@
-# CI: build and run all automated suites before any deploy. (Prepared; not executed on GitHub by the author.)
+# Runs every automated test suite against exactly what Netlify publishes (the site/ folder) on each push.
+# A red result here means: do not trust that release until it is checked.
 name: test
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
-      - run: npm install
-      - run: node build.js
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Use the published files as the test target
+        run: |
+          rm -rf dist deploy && mkdir -p dist deploy
+          cp -r site/. dist/ && cp -r site/. deploy/
       - run: npm test
         env: { PUPPETEER: puppeteer }

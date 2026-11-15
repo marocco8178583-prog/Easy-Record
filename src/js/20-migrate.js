@@ -22,7 +22,7 @@ function validateMig(o,r){var A=function(a,k){return r2(a.reduce(function(s,x){r
   var cl={};ents.forEach(function(e){cl[e.cid]=r2((cl[e.cid]||0)+(+e.amount||0))});var cn={};r.entries.forEach(function(e){cn[e.cid]=r2((cn[e.cid]||0)+(+e.amount||0))});
   for(var k in cl)if(Math.abs(cl[k]-(cn[k]||0))>0.01)return {ok:false,msg:'סכום ללקוח '+k+' לא תואם'};
   return {ok:true,oldAmt:oldAmt,oldPaid:oldPaid,count:ents.length,merged:Object.keys(r.idmap).length}}
-function bootMigrate(){S.pays=S.pays||[];S.sessions=S.sessions||[];S.debts=S.debts||[];S.expenses=S.expenses||[];S.projects=S.projects||[];S.tasks=S.tasks||[];S.tomb=S.tomb||{};S.conf=S.conf||{};if(S.schema===SCHEMA)return;
+function bootMigrate(){sanitizeState(S);S.pays=S.pays||[];S.sessions=S.sessions||[];S.debts=S.debts||[];S.expenses=S.expenses||[];S.projects=S.projects||[];S.tasks=S.tasks||[];S.tomb=S.tomb||{};S.conf=S.conf||{};if(S.schema===SCHEMA)return;
   try{var raw=localStorage.getItem(LEGACY_KEY);if(raw&&!localStorage.getItem('er4-premig-backup'))localStorage.setItem('er4-premig-backup',raw)}catch(e){}
   var old=JSON.parse(JSON.stringify(S));
   try{var r=legacyToV3(S),v=validateMig(S,r);if(!v.ok)throw new Error(v.msg);

@@ -48,5 +48,8 @@ const seed=()=>{const T=Date.now(),d=new Date();const ds=x=>x.toISOString().slic
  ok('מגע: בלי שגיאות JavaScript',!terr.length,terr.join('|'));
  // visual overflow on mobile: no horizontal scroll on any tab
  const ov=[];for(const t of tabs){await reset(t);if(await p.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+1))ov.push(t)}ok('תצוגת מובייל 390px: אין גלילה אופקית באף מסך',!ov.length,ov.join(','));
+ for(const [w,fs] of [[320,1],[360,1.3]]){const np=await b.newPage({viewport:{width:w,height:700}});await np.goto(URL);await np.waitForTimeout(600);await np.evaluate(fs=>{gLocal();S.fs=fs;save();setVals()},fs);await np.evaluate(seed);const o=[];for(const t of tabs){await np.evaluate(t=>{tab=t;CID=null;render()},t);await np.waitForTimeout(60);if(await np.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1))o.push(t)}ok('מסך '+w+'px בגודל טקסט '+fs+': אין גלילה אופקית',!o.length,o.join(','));await np.close()}
+ {const np=await b.newPage();const e2=[];np.on('pageerror',e=>e2.push(e.message));await np.goto(URL);await np.waitForTimeout(500);await np.evaluate(()=>{localStorage.setItem('er4-v3','{"schema":3,"entries":5,"clients":"x","pays":[null,1]}')});await np.reload();await np.waitForTimeout(800);
+  ok('נתונים שמורים פגומים לא מפילים את האפליקציה, והמקור נשמר בצד',await np.evaluate(()=>Array.isArray(S.entries)&&Array.isArray(S.clients)&&!!document.querySelector('main'))&&!e2.length,e2.join('|'));await np.close()}
  console.log('INFO כפתורים בלי תגובה נראית (לבדיקה ידנית): '+(silent.length?silent.join(' ; '):'אין'));
  let f=0;R.forEach(x=>{console.log((x[1]?'PASS ':'FAIL ')+x[0]+(x[1]?'':'  -> '+x[2]));if(!x[1])f++});console.log((R.length-f)+'/'+R.length+' passed');await b.close();process.exit(f?1:0)})();
