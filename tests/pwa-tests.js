@@ -10,7 +10,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function until(fn,ms=8000){const t=Date.now();while(Date.now()-t<ms){try{if(await fn())return true}catch(e){}await sleep(150)}return false}
 (async()=>{await new Promise(r=>srv.listen(0,r));const base='http://localhost:'+srv.address().port+'/';
  const b=await puppeteer.launch({args:['--no-sandbox']});const p=await b.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
- await p.goto(base);
+ await p.goto(base);await p.evaluate(()=>{window.__firstMark=1});
  const m=await p.evaluate(async()=>{const r=await fetch('manifest.webmanifest');return r.json()});
  ok('manifest תקין (standalone, rtl, אייקונים)',m.display==='standalone'&&m.dir==='rtl'&&m.icons.length>=3);
  const ic=await p.evaluate(async u=>(await fetch(u)).status,'icons/icon-512.png');ok('אייקון 512 נטען',ic===200);
@@ -19,6 +19,7 @@ async function until(fn,ms=8000){const t=Date.now();while(Date.now()-t<ms){try{i
  ok('אייקון: פיל כתום על רקע שחור, בלי צבעים או טקסט נוספים',px.or>0.04&&px.other<0.01&&px.corner.join()==='0,0,0',JSON.stringify(px));
  const at=await p.evaluate(()=>{const l=document.querySelector('link[rel=apple-touch-icon]');return l&&l.getAttribute('href')});ok('אייקון אייפון (apple-touch-icon) מוגדר ומסומן בגרסה',/apple-touch-icon\.png\?v=/.test(at||''),at);
  ok('Service Worker נרשם ופעיל',await until(()=>p.evaluate(async()=>{const r=await navigator.serviceWorker.getRegistration();return !!(r&&r.active)})));
+ ok('ביקור ראשון: הדף לא נטען מחדש כשה-SW נכנס לפעולה (מה שהמשתמש מקליד לא נמחק)',await p.evaluate(()=>window.__firstMark===1));
  await p.reload();await sleep(500);
  ok('SW שולט בדף',await p.evaluate(()=>!!navigator.serviceWorker.controller));
  // a 404 navigation must not poison the cached shell

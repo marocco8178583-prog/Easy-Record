@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Easy Record · יומן שכר</title>
-<link rel="icon" type="image/png" href="icons/favicon-48.png?v=5.0.0-beta.25">
+<link rel="icon" type="image/png" href="icons/favicon-48.png?v=5.0.0-beta.26">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Easy Record">
 <meta name="theme-color" content="#12302d">
 <script src="config.js" onerror="void 0"></script>
-<link rel="manifest" href="manifest.webmanifest?v=5.0.0-beta.25">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=5.0.0-beta.25">
+<link rel="manifest" href="manifest.webmanifest?v=5.0.0-beta.26">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=5.0.0-beta.26">
 <script>
 /*!
 
@@ -462,7 +462,7 @@ input[type=date],input[type=time]{min-width:0;max-width:100%}
 </nav>
 <script>
 /* ===== module: 00-core.js ===== */
-var APP_VER='5.0.0-beta.25',KEY='er4-v3',LEGACY_KEY='workdays-v1',SCHEMA=3,NOSAVE=false,MIGERR='',S=null,tab='clock',filt='unpaid',OP={},selD,cal;
+var APP_VER='5.0.0-beta.26',KEY='er4-v3',LEGACY_KEY='workdays-v1',SCHEMA=3,NOSAVE=false,MIGERR='',S=null,tab='clock',filt='unpaid',OP={},selD,cal;
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S||!S.entries){try{S=JSON.parse(localStorage.getItem(LEGACY_KEY))}catch(e){S=null}}
 if(!S||!S.entries)S={rate:600,entries:[],clients:[]};
@@ -2102,7 +2102,8 @@ function banner(w){if(document.getElementById('swb'))return;var d=document.creat
 window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').then(function(reg){
  if(reg.waiting&&navigator.serviceWorker.controller)banner(reg.waiting);
  reg.addEventListener('updatefound',function(){var n=reg.installing;if(!n)return;n.addEventListener('statechange',function(){if(n.state==='installed'&&navigator.serviceWorker.controller)banner(n)})})}).catch(function(){})});
-var rl=false;navigator.serviceWorker.addEventListener('controllerchange',function(){if(rl)return;rl=true;location.reload()})})();
+/* reload only when a NEW version takes over (or the user pressed "update"). On the very first visit the worker takes control too; reloading then would wipe what a new user is typing (e.g. the sign-up form). */
+var rl=false,had=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',function(){if(!had){had=true;return}if(rl)return;rl=true;location.reload()})})();
 
 </script>
 </body>

@@ -7,4 +7,5 @@ function banner(w){if(document.getElementById('swb'))return;var d=document.creat
 window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').then(function(reg){
  if(reg.waiting&&navigator.serviceWorker.controller)banner(reg.waiting);
  reg.addEventListener('updatefound',function(){var n=reg.installing;if(!n)return;n.addEventListener('statechange',function(){if(n.state==='installed'&&navigator.serviceWorker.controller)banner(n)})})}).catch(function(){})});
-var rl=false;navigator.serviceWorker.addEventListener('controllerchange',function(){if(rl)return;rl=true;location.reload()})})();
+/* reload only when a NEW version takes over (or the user pressed "update"). On the very first visit the worker takes control too; reloading then would wipe what a new user is typing (e.g. the sign-up form). */
+var rl=false,had=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',function(){if(!had){had=true;return}if(rl)return;rl=true;location.reload()})})();
