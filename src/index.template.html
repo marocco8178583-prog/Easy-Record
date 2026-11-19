@@ -115,6 +115,10 @@
     <div class="two" id="rpw" style="margin-top:8px"><div><select id="rmn" onchange="rtu()" aria-label="חודש"></select></div><div><select id="rmy" onchange="rtu()" aria-label="שנה"></select></div></div>
     <p class="m" id="rcnt"></p>
     <div class="acts"><button onclick="repGo('pdf')">⬇️ PDF</button><button class="ghost" onclick="repGo('xlsx')">⬇️ Excel</button></div></div>
+  <div class="card" id="accCard"><b>ייצוא שנתי לרואה החשבון</b>
+    <small class="m" style="display:block;margin:4px 0 8px">קובץ ZIP אחד: אקסל עם הכנסות, תקבולים, הוצאות לפי קטגוריה וסיכום שנתי, ובנוסף כל הקבלות של השנה.</small>
+    <label for="accY">שנה</label><select id="accY" style="width:100%"></select>
+    <div class="acts"><button id="accBtn" onclick="accGo()">הורדת קובץ לרואה החשבון</button></div></div>
 </section>
 
 <section id="v-clock" hidden>

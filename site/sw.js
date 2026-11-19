@@ -1,6 +1,6 @@
 /* Easy Record service worker. Cache name carries the version; user data lives in IndexedDB/localStorage and is never touched here. */
-const V='5.0.0-beta.26',CACHE='er-shell-'+V;
-const SHELL=['./','./index.html','./manifest.webmanifest','./icons/icon-192.png?v=5.0.0-beta.26','./icons/icon-512.png?v=5.0.0-beta.26','./icons/icon-maskable-512.png?v=5.0.0-beta.26','./icons/apple-touch-icon.png?v=5.0.0-beta.26'];
+const V='5.0.0-beta.27',CACHE='er-shell-'+V;
+const SHELL=['./','./index.html','./manifest.webmanifest','./icons/icon-192.png?v=5.0.0-beta.27','./icons/icon-512.png?v=5.0.0-beta.27','./icons/icon-maskable-512.png?v=5.0.0-beta.27','./icons/apple-touch-icon.png?v=5.0.0-beta.27'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k.startsWith('er-shell-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener('message',e=>{if(e.data==='SKIP_WAITING')self.skipWaiting()});

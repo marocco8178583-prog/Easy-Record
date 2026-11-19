@@ -33,7 +33,15 @@ function dago(s){var a=s.split('-'),t=new Date();t.setHours(0,0,0,0);return Math
 function odl(){return S.od||14}
 function age(e){if(e.paid)return '';var n=dago(e.date);return n>0?'<br><small class="'+(n>=odl()?'owe':'m')+'" style="font-size:13px">'+(n>=odl()?'⏰ ':'')+'ממתין '+n+' ימים</small>':''}
 function rOd(){var l=S.entries.filter(function(e){return e.bl>0.004&&dago(e.date)>=odl()}),b=$('odb');if(!l.length){b.hidden=true;return}
-  b.hidden=false;b.textContent='⏰ '+l.length+' רישומים ('+nis(l.reduce(function(a,e){return a+e.bl},0))+') ממתינים לתשלום יותר מ-'+odl()+' ימים. אפשר לשלוח תזכורת ללקוח.'}
+  b.hidden=false;b.textContent='⏰ '+l.length+' רישומים ('+nis(l.reduce(function(a,e){return a+e.bl},0))+') ממתינים לתשלום יותר מ-'+odl()+' ימים. לחץ כאן לשליחת תזכורת.';
+  b.setAttribute('role','button');b.tabIndex=0;b.style.cursor='pointer';b.onclick=odSheet;b.onkeydown=function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();odSheet()}}}
+/* overdue clients: one row per client with the overdue total and a reminder button (WhatsApp message via remind()) */
+function odList(){var by={};S.entries.forEach(function(e){if(!(e.bl>0.004)||dago(e.date)<odl())return;var o=by[e.cid]||(by[e.cid]={cid:e.cid,t:0,n:0,old:0});o.t+=c100(e.bl);o.n++;o.old=Math.max(o.old,dago(e.date))});
+  return Object.keys(by).map(function(k){return by[k]}).sort(function(a,b){return b.old-a.old||b.t-a.t})}
+function odSheet(){var l=odList();if(!l.length)return info('אין חובות ישנים');
+  $('sheetBody').innerHTML='<b>לקוחות שמאחרים בתשלום</b><small class="m">חובות שממתינים יותר מ-'+odl()+' ימים. אפשר לשנות את מספר הימים בהגדרות.</small>'+
+    l.map(function(o){var c=cl(o.cid);return '<div class="card" style="margin:6px 0"><div class="top"><div><b>'+esc(c.name)+'</b><br><small class="m">'+o.n+' רישומים · הישן ביותר לפני '+o.old+' ימים</small></div><div class="l"><b class="owe">'+nis(o.t/100)+'</b></div></div><div class="acts"><button onclick="remind('+o.cid+')">💬 שליחת תזכורת</button></div></div>'}).join('')+
+    '<button class="ghost" onclick="closeS()">סגירה</button>';$('sheet').hidden=false}
 function csv(){var q=function(v){v=String(v==null?'':v);if(/^[=+\-@\t\r]/.test(v)&&isNaN(Number(v)))v="'"+v;return '"'+v.replace(/"/g,'""')+'"'},rows=[['תאריך','לקוח','טלפון','ימים','משעה','עד שעה','שעות','שכר ליום','סכום','שולם','יתרה','תאריך תשלום אחרון','אופן תשלום אחרון','קבלה','הערה']];
   S.entries.slice().sort(function(a,b){return a.date.localeCompare(b.date)}).forEach(function(e){var c=cl(e.cid),h=eh(e);rows.push([e.date,c.name,c.phone||'',e.days,e.t1||'',e.t2||'',h?hf(h):'',e.rate,e.amount,e.pa,e.bl,e.pdate||'',e.method||'',e.receipt?'כן':'לא',e.note||''])});
   dl('work-log.csv',new Blob(['\ufeff'+rows.map(function(r){return r.map(q).join(',')}).join('\r\n')],{type:'text/csv;charset=utf-8'}))}
@@ -68,7 +76,7 @@ function rDash(){var es=S.entries.filter(dIn),T=0,P=0,D=0,by={},ny=new Date().ge
   $('dashBody').innerHTML=h;rfill()}
 /* ---- reports ---- */
 function rfill(){var c=$('rc'),v=c.value;c.innerHTML=S.clients.map(function(x){return '<option value="'+x.id+'">'+esc(x.name)+'</option>'}).join('');if(v)c.value=v;
-  if(!$('rmn').options.length){$('rmn').innerHTML=MN.map(function(n,i){return '<option value="'+i+'"'+(i===new Date().getMonth()?' selected':'')+'>'+n+'</option>'}).join('');var y=new Date().getFullYear(),h='';for(var k=2020;k<=y+1;k++)h+='<option'+(k===y?' selected':'')+'>'+k+'</option>';$('rmy').innerHTML=h}rtu()}
+  if(!$('rmn').options.length){$('rmn').innerHTML=MN.map(function(n,i){return '<option value="'+i+'"'+(i===new Date().getMonth()?' selected':'')+'>'+n+'</option>'}).join('');var y=new Date().getFullYear(),h='';for(var k=2020;k<=y+1;k++)h+='<option'+(k===y?' selected':'')+'>'+k+'</option>';$('rmy').innerHTML=h}rtu();if(typeof accFill==='function')accFill()}
 function rtu(){var t=$('rt').value,pp=t==='m'?'m':t==='d'?'':$('rpp').value;$('rcw').hidden=t!=='c';$('rpp').hidden=$('rppl').hidden=t!=='c';$('rpw').hidden=t==='d'||pp==='a';$('rmn').hidden=pp!=='m';$('rmy').hidden=pp==='a'||pp==='';
   $('rcnt').textContent='הדוח כולל '+repData().rows.filter(function(r){return !r.b}).length+' רישומים'}
 function repData(){var t=$('rt').value,pp=t==='m'?'m':t==='d'?'a':$('rpp').value,y=$('rmy').value,m=+$('rmn').value,pre=pp==='m'?y+'-'+String(m+1).padStart(2,'0'):pp==='y'?y:'',pl=pp==='m'?MN[m]+' '+y:pp==='y'?'שנת '+y:'כל התקופות',cid=$('rc').value,td=today();
