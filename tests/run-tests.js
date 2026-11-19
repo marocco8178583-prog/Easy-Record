@@ -3,7 +3,7 @@
 const fs=require('fs'),http=require('http'),path=require('path');
 const puppeteer=require(process.env.PUPPETEER||'/opt/npm-tools/node_modules/puppeteer');
 const APP=path.resolve(process.argv[2]||'index.html');
-const CHROME=process.argv[3]||process.env.CHROME||'/opt/pw-browsers/chromium-1243/chrome-linux64/chrome';
+const CHROME=process.argv[3]||process.env.CHROME||(fs.existsSync('/opt/pw-browsers/chromium-1243/chrome-linux64/chrome')?'/opt/pw-browsers/chromium-1243/chrome-linux64/chrome':undefined);
 const JSZIP=fs.readFileSync(process.argv[4]||process.env.JSZIP||'/opt/npm-tools/node_modules/jszip/dist/jszip.min.js','utf8');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const results=[];let errors=[];

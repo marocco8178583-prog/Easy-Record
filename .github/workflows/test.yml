@@ -17,4 +17,7 @@ jobs:
           rm -rf dist deploy && mkdir -p dist deploy
           cp -r site/. dist/ && cp -r site/. deploy/
       - run: npm test
-        env: { PUPPETEER: puppeteer }
+        env:
+          PUPPETEER: puppeteer
+          JSZIP: ${{ github.workspace }}/node_modules/jszip/dist/jszip.min.js
+          JSZIP_MOD: jszip
