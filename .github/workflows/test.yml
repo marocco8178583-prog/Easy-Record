@@ -12,6 +12,7 @@ jobs:
         with: { node-version: 22 }
       - run: npm install --no-audit --no-fund
       - run: npx playwright install --with-deps chromium
+      - run: sudo apt-get install -y --no-install-recommends poppler-utils
       - name: Use the published files as the test target
         run: |
           rm -rf dist deploy && mkdir -p dist deploy
