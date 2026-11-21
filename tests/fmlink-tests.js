@@ -4,13 +4,15 @@ const fs=require('fs'),http=require('http'),path=require('path');
 const puppeteer=require(process.env.PUPPETEER||'/opt/npm-tools/node_modules/puppeteer');
 const APP=path.resolve(process.argv[2]||'dist/index.html');const res=[];
 const ok=(n,c,d)=>{res.push(c);console.log((c?'PASS ':'FAIL ')+n+(c?'':'  -> '+d))};const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-const calls=[];let links=[{id:'L1',client_id:'find-medic',name:'Find Medic',created_at:'2026-11-19T09:00:00Z'}];
+const calls=[];let refreshes=0;let links=[{id:'L1',client_id:'find-medic',name:'Find Medic',created_at:'2026-11-19T09:00:00Z'}];
 function body(q){return new Promise(r=>{let b='';q.on('data',c=>b+=c);q.on('end',()=>{try{r(JSON.parse(b||'{}'))}catch(e){r({})}})})}
 const FM_CB='https://wgiahldrrnrqnlprbdyd.supabase.co/functions/v1/easy-record-oauth';
 const api=http.createServer(async(q,s)=>{s.setHeader('Access-Control-Allow-Origin','*');s.setHeader('Access-Control-Allow-Headers','*');s.setHeader('Access-Control-Allow-Methods','*');if(q.method==='OPTIONS'){s.statusCode=204;return s.end()}
   const b=await body(q),u=q.url.split('?')[0],auth=(q.headers.authorization||'').slice(7),j=(c,o)=>{s.statusCode=c;s.setHeader('content-type','application/json');s.end(JSON.stringify(o))};
   if(u.startsWith('/functions/v1/findmedic'))calls.push({m:q.method,u:u.replace('/functions/v1/findmedic',''),auth,b});
   if(u==='/auth/v1/settings')return j(200,{external:{email:true}});
+  if(u==='/auth/v1/token'&&/refresh_token/.test(q.url)){refreshes++;await new Promise(r=>setTimeout(r,150));if(b.refresh_token!=='R')return j(400,{error_code:'refresh_token_already_used'});return j(200,{access_token:'TOK',refresh_token:'R2',expires_in:3600,user:{id:'u1',email:'worker@example.com'}})}
+  if(u.startsWith('/rest/v1/records')&&auth==='OLD')return j(401,{message:'JWT expired'});
   if(u==='/auth/v1/user')return auth==='TOK'?j(200,{id:'u1',email:'worker@example.com',factors:[]}):j(401,{});
   if(u.startsWith('/rest/v1/'))return j(200,[]);
   if(u==='/functions/v1/findmedic/oauth/approve'){if(auth!=='TOK')return j(401,{error:'unauthorized'});return j(200,{redirect:FM_CB+'?code=CODE123&state='+encodeURIComponent(b.state)})}
@@ -64,6 +66,19 @@ const api=http.createServer(async(q,s)=>{s.setHeader('Access-Control-Allow-Origi
   ok('ניתוק מבקש אישור ומסביר שימי עבודה קיימים נשארים',/ימי עבודה שכבר נוספו נשארים/.test(await sheetText(p)));
   await p.evaluate(()=>fmRevokeGo('L1'));await sleep(1200);
   ok('הניתוק נשלח לשרת והרשימה מתעדכנת',calls.some(c=>c.u==='/links/revoke'&&c.b.id==='L1'&&c.auth==='TOK')&&await p.evaluate(()=>document.getElementById('fmLinks').hidden));
+  await ctx.close();
+  // 6. sign-in renewal: 10 requests failing together -> exactly one renewal, all succeed with the new token
+  ({ctx,p}=await open(base,true));
+  const rr=await p.evaluate(async()=>{const s=aGet();s.access_token='OLD';s.refresh_token='R';aSet(s);const db=makeSbDb();db.stop();
+    const out=await Promise.all(Array.from({length:10},()=>db.req('GET','/rest/v1/records?select=id&limit=1').then(r=>r.status).catch(e=>'ERR '+e.message)));return {out,tok:aGet().access_token,rt:aGet().refresh_token}});
+  ok('10 בקשות שנכשלו יחד בגלל תוקף: חידוש כניסה אחד בלבד',refreshes===1,'refreshes='+refreshes);
+  ok('כל 10 הבקשות הצליחו עם הטוקן החדש, והכניסה נשמרה',rr.out.every(x=>x===200)&&rr.tok==='TOK'&&rr.rt==='R2',JSON.stringify(rr));
+  await ctx.close();
+  // 7. translated consent (English)
+  ({ctx,p}=await open(base+Q,true));
+  await p.evaluate(()=>{closeS();FMA.shown=false;setLang('en')});await sleep(600);await p.evaluate(()=>{fmMaybeConsent()});await sleep(800);
+  t=await sheetText(p);
+  ok('מסך ההסכמה מתורגם לאנגלית כשהאפליקציה באנגלית',/Connect Find Medic to Easy Record/.test(t)&&/cannot see, change or delete/.test(t)&&/Approve connection/.test(t)&&!/[\u0590-\u05ff]{3,}/.test(t),t.slice(0,300));
   await ctx.close();
   ok('כל הקריאות לפונקציה נשלחו עם הטוקן של המשתמש או בלי טוקן, אף פעם עם מפתח אחר',calls.every(c=>c.auth==='TOK'));
   ok('אין שגיאות JS',errs.length===0,errs.join(' | '));

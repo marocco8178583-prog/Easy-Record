@@ -3,10 +3,10 @@
 var SBDB=null;
 function makeSbDb(){
   var TY={ws_e:'entry',ws_p:'payment',ws_c:'client',ws_t:'session',ws_d:'debt',ws_x:'expense',ws_j:'project',ws_k:'task'},timers=[],base=CFG.supabaseUrl.replace(/\/$/,''),pollMs=+CFG.pollMs||15000;
-  async function refresh(){var s=aGet();if(!s||!s.refresh_token)return null;var r=await aFetch('/auth/v1/token?grant_type=refresh_token','POST',{refresh_token:s.refresh_token});var ns=r.ok&&aSess(r.data);if(!ns)return null;aSet(ns);return ns}
+  async function refresh(oldTok){return aRefresh(oldTok)}  /* shared single-flight renewal (32-auth.js) */
   async function req(method,path,body,extra){var s=aGet();if(!s)throw new Error('נדרשת כניסה לחשבון');
     function once(tok){return fetch(base+path,{method:method,headers:Object.assign({'Content-Type':'application/json',apikey:CFG.supabaseAnonKey,Authorization:'Bearer '+tok},extra||{}),body:body==null?undefined:(body instanceof Blob?body:JSON.stringify(body))})}
-    var r=await once(s.access_token);if(r.status===401){var ns=await refresh();if(!ns)throw new Error('נדרשת כניסה מחדש');r=await once(ns.access_token)}
+    var r=await once(s.access_token);if(r.status===401){var ns=await refresh(s.access_token);if(!ns)throw new Error('נדרשת כניסה מחדש');r=await once(ns.access_token)}
     if(!r.ok){var t='';try{t=await r.text()}catch(e){}var m=/version_conflict/.test(t)?'version_conflict':'שגיאת שרת '+r.status+(t?': '+t.replace(/[<>]/g,'').slice(0,400):'');throw new Error(m)}return r}
   async function rows(q){var out=[],off=0,page=1000;for(;;){var r=await req('GET','/rest/v1/records?select=id,type,data,updated_at&'+q+'&order=updated_at.asc,id.asc&limit='+page+'&offset='+off),a=await r.json();out=out.concat(a);if(a.length<page)break;off+=page}return out}
   function split(path){var i=path.indexOf('/');return [path.slice(0,i),path.slice(i+1)]}
