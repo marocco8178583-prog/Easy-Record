@@ -12,9 +12,11 @@
 // Shifts (contract v1, integrations/easy-record/openapi.yaml in Find Medic):
 //   POST /findmedic/v1/shifts, PATCH /findmedic/v1/shifts/{id}, POST /findmedic/v1/shifts/{id}/cancel|complete
 //   Authorization: Bearer <access token>; X-FindMedic-Signature: t=..,v1=HMAC-SHA256(access token, "t.body"), |now-t| <= 300 s.
-// What Find Medic can do: create / update / remove the work days IT created (and create a client for the employer).
-// It can never read, change or delete any other record.
+// What Find Medic can do: create / update / remove the work days IT created (and create a client for the employer),
+// and add / remove ONE payment per shift when Find Medic pays the worker (payment_state paid_out) or takes it back
+// (refunded / voided / shift cancelled). Logic: ./payments.ts. It can never read, change or delete any other record.
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { paymentAction, paymentData } from './payments.ts';
 
 const APP_URL = 'https://easyrecordv5.netlify.app/';
 const CLIENTS: Record<string, { name: string; redirects: string[] }> = {
@@ -68,7 +70,7 @@ async function linkFor(req: Request) {        // Find Medic calling with a conne
 type Doc = { t: string; id: number; v: number; u: number; cr?: number; d: boolean; data?: Record<string, unknown> };
 const newId = () => Date.now() * 1000 + Math.floor(Math.random() * 1000);     // same scheme as the app's uid()
 const keyOf = (t: string, id: number) => t + (id < 0 ? 'n' + (-id) : id);     // same as the app's kf()
-const TYPE: Record<string, string> = { e: 'entry', c: 'client' };
+const TYPE: Record<string, string> = { e: 'entry', c: 'client', p: 'payment' };
 
 async function getRow(userId: string, key: string) {
   const { data } = await svc().from('records').select('id,ver,deleted,data').eq('user_id', userId).eq('id', key).maybeSingle();
@@ -94,7 +96,7 @@ async function clientIdFor(userId: string, name: string) {
 }
 
 type Shift = { operation?: string; external_assignment_id?: string; title?: string; employer_name?: string; date?: string;
-  planned_start?: string; planned_end?: string; agreed_compensation_agorot?: number; map_link?: string; status?: string };
+  planned_start?: string; planned_end?: string; agreed_compensation_agorot?: number; map_link?: string; status?: string; payment_state?: string };
 const hhmm = (iso?: string) => {
   if (!iso) return '';
   const d = new Date(iso); if (isNaN(+d)) return '';
@@ -152,6 +154,38 @@ async function changeShift(userId: string, ref: string, s: Shift, op: 'update' |
   if (!removed && JSON.stringify(doc.data) === JSON.stringify(cur.data)) return { status: 200, body: { id: row.id } };  // nothing changed
   await updateDoc(userId, doc);
   return { status: 200, body: { id: row.id, deleted: removed } };
+}
+
+// Record / remove the Find Medic payment for one shift. Runs after every successful shift call. If it fails, the call
+// returns 5xx and Find Medic retries; the shift part is idempotent, so the retry only redoes the payment step.
+async function syncPayment(userId: string, ext: string | undefined, s: Shift) {
+  if (!ext || !/^[0-9a-f-]{36}$/i.test(ext)) return;
+  const db = svc();
+  const { data: m } = await db.from('fm_shifts').select('entry_id,client_id,payment_id').eq('user_id', userId).eq('external_assignment_id', ext).maybeSingle();
+  if (!m) return;
+  const entryId = Number(m.entry_id);
+  const entry = await getRow(userId, keyOf('e', entryId));
+  const removed = !entry || entry.deleted;
+  const amount = Number(entry?.data?.data?.amount ?? 0);
+  const act = paymentAction(s.payment_state, removed, m.payment_id != null, amount);
+  if (act === 'create') {
+    const id = newId(), now = Date.now();
+    // reserve first, so two retries arriving together cannot both add a payment
+    const { data: got } = await db.from('fm_shifts').update({ payment_id: id }).eq('user_id', userId).eq('external_assignment_id', ext).is('payment_id', null).select('payment_id');
+    if (!got?.length) return;
+    const cid = Number(entry!.data.data?.cid ?? m.client_id);
+    try {
+      await insertDoc(userId, { t: 'p', id, v: 1, u: now, cr: now, d: false, data: paymentData(id, entryId, cid, amount, s.title) });
+    } catch (e) {
+      await db.from('fm_shifts').update({ payment_id: null }).eq('user_id', userId).eq('external_assignment_id', ext).eq('payment_id', id);
+      throw e;
+    }
+  } else if (act === 'remove') {
+    const pid = Number(m.payment_id);
+    const row = await getRow(userId, keyOf('p', pid));
+    if (row && !row.deleted) await updateDoc(userId, { t: 'p', id: pid, v: row.ver + 1, u: Date.now(), d: true });
+    await db.from('fm_shifts').update({ payment_id: null }).eq('user_id', userId).eq('external_assignment_id', ext).eq('payment_id', pid);
+  }
 }
 
 // ------------------------------------------------------------------ routes
@@ -240,6 +274,7 @@ Deno.serve(async (req) => {
       } else if (m[1] && !m[2] && req.method === 'PATCH') r = await changeShift(link.user_id, ref, s, s.operation === 'cancel' ? 'cancel' : 'update');
       else if (m[1] && m[2] && req.method === 'POST') r = await changeShift(link.user_id, ref, s, m[2] as 'cancel' | 'complete');
       else return json(req, 405, { error: 'method not allowed' });
+      if (r.status < 300 || r.status === 409) await syncPayment(link.user_id, ref.startsWith('ext:') ? ref.slice(4) : s.external_assignment_id, s);
       return json(req, r.status, r.body);
     }
     return json(req, 404, { error: 'not found' });
