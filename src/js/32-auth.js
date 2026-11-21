@@ -7,6 +7,14 @@ function aSet(s){try{if(s)localStorage.setItem(AUTHK,JSON.stringify(s));else loc
 function aSess(d){if(!d||!d.access_token)return null;return {access_token:d.access_token,refresh_token:d.refresh_token,expires_at:Date.now()+(+d.expires_in||3600)*1000,user:{id:d.user&&d.user.id,email:d.user&&d.user.email||'',phone:d.user&&d.user.phone||''}}}
 async function aFetch(path,method,body,token){var r;try{r=await fetch(CFG.supabaseUrl.replace(/\/$/,'')+path,{method:method,headers:{'Content-Type':'application/json',apikey:CFG.supabaseAnonKey,Authorization:'Bearer '+(token||CFG.supabaseAnonKey)},body:body?JSON.stringify(body):undefined})}catch(e){return {ok:false,net:true,status:0,data:{}}}
   var d={};try{d=await r.json()}catch(e){}return {ok:r.ok,status:r.status,data:d||{}}}
+/* One sign-in renewal at a time for the whole app. Supabase rotates refresh tokens: several renewals with the same token
+   at once (e.g. every sync request getting 401 together) can make the server revoke the session and sign the user out.
+   Callers that hold an old access token get the current one if another renewal already finished. */
+var AREF=null;
+function aRefresh(oldTok){var cur=aGet();if(cur&&cur.access_token&&oldTok&&cur.access_token!==oldTok)return Promise.resolve(cur);if(AREF)return AREF;
+  AREF=(async function(){try{var s=aGet();if(!s||!s.refresh_token)return null;var r=await aFetch('/auth/v1/token?grant_type=refresh_token','POST',{refresh_token:s.refresh_token});
+    var ns=r.ok&&aSess(r.data);if(!ns){var now=aGet();return now&&now.access_token!==s.access_token?now:null}if(!ns.user||!ns.user.id)ns.user=s.user;aSet(ns);return ns}
+    finally{setTimeout(function(){AREF=null},0)}})();return AREF}
 function aErr(r){if(r.net)return navigator.onLine===false?'אין חיבור לאינטרנט. נסה שוב כשיש חיבור.':'שרת החשבונות לא זמין כרגע. אפשר להמשיך לעבוד במכשיר, והנתונים יסתנכרנו כשהשרת יחזור. אם זה נמשך, פנה למנהל האפליקציה.';if(r.status>=500||r.status===503||r.status===540)return 'שרת החשבונות לא זמין כרגע (שגיאה '+r.status+'). נסה שוב בעוד כמה דקות.';var c=(r.data.error_code||r.data.code||'')+'',m=(r.data.msg||r.data.message||r.data.error_description||'')+'';
   if(r.status===429||/rate|too many/i.test(c+m))return 'יותר מדי ניסיונות. נסה שוב בעוד כמה דקות.';
   if(/invalid_credentials|invalid login/i.test(c+m))return 'האימייל/טלפון או הסיסמה שגויים.';

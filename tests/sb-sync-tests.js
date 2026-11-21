@@ -36,6 +36,14 @@ const api=http.createServer(async(q,s)=>{s.setHeader('Access-Control-Allow-Origi
  const b=await puppeteer.launch({args:['--no-sandbox']});const errs=[];
  async function dev(){const c=await b.createBrowserContext();const p=await c.newPage();p.on('pageerror',e=>errs.push(e.message));await p.goto(base);await sleep(600);return p}
  const sign=async(p,id,pw,up)=>{await p.evaluate((i,w,u)=>{gId.value=i;gPw.value=w;gPw2.value=w;if(u){gMode('up');gFn.value='א';gLn.value='ב';gDob.value='1990-01-01';gTerms.checked=true}return u?gSignUp():gSignIn()},id,pw,up);await sleep(700)};
+ // Signing out (aOut) and "continue without the guest data" (aMerge(false)) switch profiles by RELOADING the page.
+ // Wait for that reload to finish instead of a fixed sleep: on a slow machine (GitHub's runners) the reload used to land
+ // in the middle of the next step, which then ran on a page that was going away.
+ const navAfter=async(p,f)=>{const nav=p.waitForNavigation({timeout:15000}).catch(()=>null);
+   await p.evaluate(f).catch(e=>{if(!/context was destroyed|navigation/i.test(e.message))throw e});await nav;
+   await p.waitForFunction(()=>document.readyState==='complete'&&typeof gSignIn==='function',{timeout:15000}).catch(()=>{});await sleep(400)};
+ // The app may reload itself right after signing in; that is not a failure, so wait for the page to settle instead of crashing.
+ const sign=async(p,id,pw,up)=>{try{await p.evaluate((i,w,u)=>{gId.value=i;gPw.value=w;gPw2.value=w;if(u){gMode('up');gFn.value='א';gLn.value='ב';gDob.value='1990-01-01'}return u?gSignUp():gSignIn()},id,pw,up)}catch(e){if(!/context was destroyed|navigation/i.test(e.message))throw e;await p.waitForFunction(()=>document.readyState==='complete'&&typeof gSignIn==='function',{timeout:8000}).catch(()=>{})}await sleep(700)};
  const D1=await dev(),D2=await dev();
  await sign(D1,'a@b.co','password1',true);
  ok('D1 נרשם ומחובר לענן (CDB פעיל)',await D1.evaluate(()=>!!CDB&&!!SBDB));
@@ -67,14 +75,14 @@ const api=http.createServer(async(q,s)=>{s.setHeader('Access-Control-Allow-Origi
  ok('לקוחות שנוצרו במקביל בשני מכשירים לא נעלמים ולא מוכפלים',await until(async()=>{const f=()=>D=>D.evaluate(()=>S.clients.map(c=>c.id).sort().join(','));return (await f()(D1))===(await f()(D2))&&(await f()(D1)).split(',').length===3}),await D1.evaluate(()=>S.clients.map(c=>c.id).join(',')));
  // ===== account separation on one device =====
  const aIds=await D1.evaluate(()=>S.clients.map(c=>c.id).sort().join(','));
- await D1.evaluate(()=>{aOut()});await sleep(1200);
+ await navAfter(D1,()=>{aOut()});
  ok('יציאה: נתוני החשבון לא מוצגים יותר במכשיר (מצב אורח ריק) והשער חזר',await D1.evaluate(()=>!gate.hidden&&S.clients.length===0&&S.entries.length===0&&owner()==='guest'),await D1.evaluate(()=>JSON.stringify([S.clients.length,owner()])));
  const before=[...rowsDB.values()].filter(r=>r.user_id==='uid-0').length;
  await sign(D1,'c@d.co','password1',true);await sleep(800);
  ok('חשבון ב׳ באותו מכשיר: מתחיל ריק, לא רואה ולא מעלה את נתוני חשבון א׳',await D1.evaluate(()=>gate.hidden&&S.clients.length===0&&owner()===aGet().user.id)&&[...rowsDB.values()].filter(r=>r.user_id==='uid-0').length===before,await D1.evaluate(()=>S.clients.length)+'/'+before);
  ok('משתמש ב׳ לא רואה נתוני משתמש א׳ (בקשת קריאה ישירה)',await D1.evaluate(async()=>{const s=aGet();const r=await fetch(CFG.supabaseUrl+'/rest/v1/records?select=*',{headers:{apikey:CFG.supabaseAnonKey,Authorization:'Bearer '+s.access_token}});const g=await r.json();return Array.isArray(g)&&!g.some(x=>x.type==='client'||x.type==='entry')}));
  await D1.evaluate(async()=>{S.clients.push({id:901,name:'לקוח של ב׳',phone:''});stamp();save();await syncNow()});
- await D1.evaluate(()=>{aOut()});await sleep(1200);
+ await navAfter(D1,()=>{aOut()});
  await sign(D1,'a@b.co','password1',false);await sleep(900);
  ok('חזרה לחשבון א׳: הנתונים שלו חוזרים, בלי הלקוח של ב׳',await until(()=>D1.evaluate((x)=>S.clients.map(c=>c.id).sort().join(',')===x&&!S.clients.some(c=>c.id===901),aIds)),await D1.evaluate(()=>S.clients.map(c=>c.id).join(',')));
  ok('בענן: הלקוח של ב׳ שמור רק אצל ב׳',[...rowsDB.values()].filter(r=>r.id==='c901').every(r=>r.user_id==='uid-1')&&[...rowsDB.values()].some(r=>r.id==='c901'));
@@ -83,9 +91,9 @@ const api=http.createServer(async(q,s)=>{s.setHeader('Access-Control-Allow-Origi
  await D3.evaluate(()=>{gLocal();S.clients.push({id:701,name:'אורח',phone:''});S.entries.push({id:702,cid:701,date:'2026-11-09',days:1,rate:500,amount:500});derive();stamp();save();aGate()});
  await sign(D3,'a@b.co','password1',false);await sleep(700);
  ok('אורח עם נתונים שנכנס לחשבון: מוצג חלון מיזוג עם תצוגה מקדימה, ושום דבר עוד לא הועלה',await D3.evaluate(()=>!$('sheet').hidden&&/1 לקוחות/.test($('mgPrev').textContent)&&/1 ימי עבודה/.test($('mgPrev').textContent)&&!SBDB)&&![...rowsDB.values()].some(r=>r.id==='e702'),await D3.evaluate(()=>$('sheetBody').textContent.slice(0,120)));
- await D3.evaluate(()=>{aMerge(false)});await sleep(1500);
+ await navAfter(D3,()=>{aMerge(false)});
  ok('בחירה "בלי הנתונים האלה": החשבון נטען בלי נתוני האורח, והם לא הועלו',await until(()=>D3.evaluate((x)=>S.clients.map(c=>c.id).sort().join(',')===x,aIds))&&![...rowsDB.values()].some(r=>r.id==='e702'),await D3.evaluate(()=>S.clients.map(c=>c.id).join(',')));
- await D3.evaluate(()=>{aOut()});await sleep(1200);
+ await navAfter(D3,()=>{aOut()});
  ok('אחרי יציאה: נתוני האורח חזרו בשלמותם (לא נמחקו)',await D3.evaluate(()=>S.clients.length===1&&S.clients[0].id===701&&S.entries.length===1&&S.entries[0].amount===500&&owner()==='guest'),await D3.evaluate(()=>JSON.stringify([S.clients.length,S.entries.length,owner()])));
  await sign(D3,'a@b.co','password1',false);await sleep(700);
  await D3.evaluate(()=>{aMerge(true)});
@@ -95,7 +103,7 @@ const api=http.createServer(async(q,s)=>{s.setHeader('Access-Control-Allow-Origi
  const addFile=(P,name,type,body)=>P.evaluate(async(n,t,b)=>{const c=S.clients[0];UP={eid:0,cid:c.id};const dt=new DataTransfer();dt.items.add(new File([b],n,{type:t}));$('rf').files=dt.files;await $('rf').onchange();await rcSync();return R[R.length-1].id},name,type,body);
  const rid=await addFile(D2,'kabala.pdf','application/pdf','%PDF-1.4 easy record test file');
  ok('קבלה שנוספה ב-D2 עולה לאחסון הפרטי בנתיב <מזהה משתמש>/<מזהה קבלה>, ונרשמת כרשומה',store.has('uid-0/'+rid)&&[...rowsDB.values()].some(r=>r.id==='r'+rid&&r.user_id==='uid-0'&&r.type==='receipt')&&await D2.evaluate(i=>R.find(r=>r.id===i).up===1,rid),[...store.keys()].join());
- await D1.evaluate(()=>rcSync());
+ await until(()=>D1.evaluate(async i=>{await rcSync();return R.some(x=>x.id===i)},rid));
  ok('D1 מקבל את הקבלה ברשימה בלי להוריד את הקובץ (הורדה עצלה)',await D1.evaluate(i=>{const r=R.find(x=>x.id===i);return !!r&&r.blob===null&&r.up===1&&r.name==='kabala.pdf'},rid));
  ok('פתיחת הקבלה ב-D1 מורידה את הקובץ המקורי עם הטוקן של המשתמש',await D1.evaluate(async i=>{await vr(i);const r=R.find(x=>x.id===i);return !!r.blob&&(await r.blob.text())==='%PDF-1.4 easy record test file'},rid));
  await D1.evaluate(()=>closeS());
@@ -109,13 +117,13 @@ const api=http.createServer(async(q,s)=>{s.setHeader('Access-Control-Allow-Origi
  // delete propagates
  await D2.evaluate(async i=>{window.cf=function(t,fn){fn()};dr(i);await new Promise(r=>setTimeout(r,300));await rcSync()},rid);
  ok('מחיקת קבלה ב-D2 מוחקת את הקובץ מהענן ומסמנת את הרשומה כמחוקה',await until(()=>!store.has('uid-0/'+rid)&&[...rowsDB.values()].some(r=>r.id==='r'+rid&&r.deleted===true)));
- await D1.evaluate(()=>rcSync());
- ok('המחיקה מגיעה ל-D1',await D1.evaluate(i=>!R.some(r=>r.id===i),rid));
+ ok('המחיקה מגיעה ל-D1',await until(()=>D1.evaluate(async i=>{await rcSync();return !R.some(r=>r.id===i)},rid)));
  // cloud not set up (migration 002 not run): everything stays local, clear status, no errors
  hasBucket=false;const lid=await addFile(D2,'local.pdf','application/pdf','%PDF local only');
  ok('בלי הגדרת האחסון בענן: הקבלה נשמרת במכשיר, והסטטוס מסביר מה חסר',await D2.evaluate(i=>{const r=R.find(x=>x.id===i);return !!r&&!!r.blob&&!r.up&&RCS.setup===false&&/002_receipts_storage/.test(rcStatus())},lid),await D2.evaluate(()=>rcStatus()+'|'+RCS.err));
  hasBucket=true;await D2.evaluate(()=>rcSync());
- ok('אחרי שהאחסון הוגדר: הקבלה הממתינה עולה לבד',store.has('uid-0/'+lid)&&await D2.evaluate(()=>RCS.setup===true));
+ // rcSync() does nothing while a sync started by the app's own timer is still running, so retry until the upload lands.
+ ok('אחרי שהאחסון הוגדר: הקבלה הממתינה עולה לבד',await until(async()=>{await D2.evaluate(()=>rcSync());return store.has('uid-0/'+lid)&&await D2.evaluate(()=>RCS.setup===true)}));
  // ===== debts I owe: sync, and graceful behaviour when the server schema lacks the type =====
  await D2.evaluate(async()=>{S.debts=S.debts||[];S.debts.push({id:8801,name:'ספק',amount:750,date:'2026-11-10',due:'',note:'',pays:[]});LASTDP={k:'',t:0};debtPay(8801,250,'2026-11-10','');save();await syncNow()});
  ok('חוב שלי שנרשם ב-D2 מגיע ל-D1 עם התשלום החלקי (יתרה 500)',await until(()=>D1.evaluate(()=>(S.debts||[]).some(d=>d.id===8801&&debtBal(d)===500)),8000)&&[...rowsDB.values()].some(r=>r.id==='d8801'&&r.type==='debt'&&r.user_id==='uid-0'));
@@ -149,8 +157,8 @@ const api=http.createServer(async(q,s)=>{s.setHeader('Access-Control-Allow-Origi
  allowTask=true;await D2.evaluate(async()=>{TASKOFF=false;await syncNow()});
  ok('אחרי עדכון השרת: המשימה הממתינה עולה',await until(()=>[...rowsDB.values()].some(r=>r.type==='task'&&r.data&&r.data.data&&r.data.data.title==='מקומית בלבד'),8000));
  const vid=await D2.evaluate(async()=>{const b=new Blob([new Uint8Array(2048).fill(7)],{type:'audio/webm;codecs=opus'});const r={id:uid(),cid:S.clients[0].id,eid:0,name:'הערה קולית.webm',type:b.type,date:today(),blob:b,kind:'voice',dur:4};await tx('readwrite',st=>st.put(r));R.push(r);await rcSync();return r.id});
- ok('הערה קולית עולה לאחסון הפרטי כקובץ שמע (סוג בסיסי audio/webm, בלי פרמטרים)',store.has('uid-0/'+vid)&&store.get('uid-0/'+vid).ct==='audio/webm',[...store.keys()].join()+' '+(store.get('uid-0/'+vid)||{}).ct);
- await D1.evaluate(()=>rcSync());
+ ok('הערה קולית עולה לאחסון הפרטי כקובץ שמע (סוג בסיסי audio/webm, בלי פרמטרים)',await until(async()=>{if(!store.has('uid-0/'+vid))await D2.evaluate(()=>rcSync());return store.has('uid-0/'+vid)})&&store.get('uid-0/'+vid).ct==='audio/webm',[...store.keys()].join()+' '+(store.get('uid-0/'+vid)||{}).ct);
+ await until(()=>D1.evaluate(async i=>{await rcSync();return R.some(x=>x.id===i)},vid));
  ok('D1 מקבל את ההערה הקולית ברשימה (עם סוג "קולית" ומשך) ומוריד אותה בפתיחה',await D1.evaluate(async i=>{const r=R.find(x=>x.id===i);if(!r||r.kind!=='voice'||r.dur!==4)return false;await vr(i);const ok=!!document.querySelector('#sheetBody audio')&&r.blob&&r.blob.size===2048;closeS();return ok},vid));
  // ===== language setting survives sync polling and reaches the other device =====
  await D2.evaluate(async()=>{setLang('en');await syncNow()});await sleep(1800);
