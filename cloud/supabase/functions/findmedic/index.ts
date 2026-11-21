@@ -100,11 +100,49 @@ const hhmm = (iso?: string) => {
   const d = new Date(iso); if (isNaN(+d)) return '';
   return new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jerusalem', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(d);
 };
-function entryFields(s: Shift) {
-  const amount = Number.isSafeInteger(s.agreed_compensation_agorot) && s.agreed_compensation_agorot! >= 0 ? s.agreed_compensation_agorot! / 100 : 0;
-  const note = ['Find Medic', s.title, s.map_link].filter(Boolean).join(' · ').slice(0, 300);
-  return { date: s.date!, days: 1, rate: amount, amount, t1: hhmm(s.planned_start), t2: hhmm(s.planned_end), note };
+// Only the fields Find Medic actually sent. A field it left out (e.g. pay the worker chose not to share) is
+// absent here, so an update never blanks or zeroes a value the worker typed in the app.
+function shiftFields(s: Shift) {
+  const f: Record<string, unknown> = { date: s.date! };
+  const t1 = hhmm(s.planned_start), t2 = hhmm(s.planned_end);
+  if (t1) f.t1 = t1;
+  if (t2) f.t2 = t2;
+  if (Number.isSafeInteger(s.agreed_compensation_agorot) && s.agreed_compensation_agorot! >= 0) f.amount = f.rate = s.agreed_compensation_agorot! / 100;
+  f.note = ['Find Medic', s.title, s.map_link].filter(Boolean).join(' · ').slice(0, 300);
+  return f;
 }
+// Fields the worker may change in the app (`rate` always moves together with `amount`). `fmv` keeps what Find Medic
+// last wrote to them: if the value in the app differs from it, the worker edited it, and Find Medic updates leave it alone.
+const OWNED = ['amount', 'note'] as const;
+function entryFields(s: Shift) {
+  const f = shiftFields(s);
+  const base: Record<string, unknown> = { days: 1, rate: 0, amount: 0, t1: '', t2: '', ...f };
+  base.fmv = Object.fromEntries(OWNED.map(k => [k, base[k]]));
+  return base;
+}
+// Merge a Find Medic update into the current work day.
+// Date and hours always follow Find Medic (the shift moved). Pay and note follow it only if the worker did not edit them.
+function mergeShift(cur: Record<string, unknown>, s: Shift) {
+  const f = shiftFields(s), next: Record<string, unknown> = { ...cur };
+  for (const k of ['date', 't1', 't2']) if (k in f) next[k] = f[k];
+  const last = cur.fmv as Record<string, unknown> | undefined, fmv: Record<string, unknown> = { ...(last ?? {}) };
+  for (const k of OWNED) {
+    if (!(k in f)) continue;
+    // Days written before `fmv` existed: we cannot tell an edit apart, so only fill in a pay of 0.
+    const edited = last ? cur[k] !== last[k] : (k === 'note' || Number(cur.amount) !== 0);
+    if (!edited) { next[k] = f[k]; if (k === 'amount') next.rate = f.rate; }
+    fmv[k] = f[k];
+  }
+  next.fmv = fmv;
+  return next;
+}
+// Payments in the app that are allocated (fully or partly) to this work day.
+async function paidFor(userId: string, entryId: number) {
+  const { data } = await svc().from('records').select('data').eq('user_id', userId).eq('type', 'payment').eq('deleted', false).limit(5000);
+  return ((data ?? []) as { data: Doc }[]).some(r => Array.isArray(r.data?.data?.alloc)
+    && (r.data!.data!.alloc as { eid?: number }[]).some(a => Number(a?.eid) === entryId));
+}
+const CANCEL_NOTE = 'בוטל ב-Find Medic';
 const validShift = (s: Shift) => /^[0-9a-f-]{36}$/i.test(s.external_assignment_id ?? '') && /^\d{4}-\d{2}-\d{2}$/.test(s.date ?? '');
 
 async function createShift(userId: string, s: Shift) {
@@ -145,13 +183,23 @@ async function changeShift(userId: string, ref: string, s: Shift, op: 'update' |
   if (!row) return { status: 404, body: { error: 'unknown shift' } };
   const removed = op === 'cancel' || s.status === 'cancelled' || s.status === 'no_show';
   if (row.deleted) return { status: 200, body: { id: row.id, deleted: true } };   // removed in the app or already cancelled
-  const now = Date.now(), cur = row.data;
-  const doc: Doc = removed
-    ? { t: 'e', id: entryId, v: row.ver + 1, u: now, d: true }
-    : { t: 'e', id: entryId, v: row.ver + 1, u: now, cr: cur.cr, d: false, data: { ...(cur.data ?? {}), ...(validShift(s) ? entryFields(s) : {}) } };
-  if (!removed && JSON.stringify(doc.data) === JSON.stringify(cur.data)) return { status: 200, body: { id: row.id } };  // nothing changed
-  await updateDoc(userId, doc);
-  return { status: 200, body: { id: row.id, deleted: removed } };
+  const now = Date.now(), cur = row.data, data = (cur.data ?? {}) as Record<string, unknown>;
+  let next: Record<string, unknown>;
+  if (removed) {
+    // A day the worker was already paid for is kept (marked cancelled), so the payment is never left pointing at nothing.
+    if (await paidFor(userId, entryId)) {
+      const note = String(data.note ?? '');
+      next = { ...data, fmCancelled: true, note: note.startsWith(CANCEL_NOTE) ? note : (CANCEL_NOTE + (note ? ' · ' + note : '')).slice(0, 300) };
+      if (JSON.stringify(next) !== JSON.stringify(data)) await updateDoc(userId, { t: 'e', id: entryId, v: row.ver + 1, u: now, cr: cur.cr, d: false, data: next });
+      return { status: 200, body: { id: row.id, deleted: false, kept_paid: true } };
+    }
+    await updateDoc(userId, { t: 'e', id: entryId, v: row.ver + 1, u: now, d: true });
+    return { status: 200, body: { id: row.id, deleted: true } };
+  }
+  next = validShift(s) ? mergeShift(data, s) : data;
+  if (JSON.stringify(next) === JSON.stringify(data)) return { status: 200, body: { id: row.id } };  // nothing changed
+  await updateDoc(userId, { t: 'e', id: entryId, v: row.ver + 1, u: now, cr: cur.cr, d: false, data: next });
+  return { status: 200, body: { id: row.id, deleted: false } };
 }
 
 // ------------------------------------------------------------------ routes

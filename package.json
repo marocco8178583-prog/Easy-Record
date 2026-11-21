@@ -5,11 +5,12 @@
   "description": "Easy Record - work days, hours, clients and payments (PWA)",
   "scripts": {
     "build": "node build.js",
-    "test": "node tests/run-tests.js dist/index.html && node tests/extra-tests.js dist/index.html && node tests/auth-tests.js dist/index.html && node tests/sb-sync-tests.js dist/index.html && node tests/wage-tests.js && node tests/pay-tests.js && node tests/audio-tests.js && node tests/buttons-tests.js && node tests/native-tests.js dist/index.html && node tests/pwa-tests.js deploy && node tests/fmlink-tests.js dist/index.html"
+    "test": "node tests/run-tests.js dist/index.html && node tests/extra-tests.js dist/index.html && node tests/auth-tests.js dist/index.html && node tests/sb-sync-tests.js dist/index.html && node tests/wage-tests.js && node tests/pay-tests.js && node tests/audio-tests.js && node tests/buttons-tests.js && node tests/native-tests.js dist/index.html && node tests/pwa-tests.js deploy && node tests/fmlink-tests.js dist/index.html && node tests/fmserver-tests.js"
   },
   "devDependencies": {
     "puppeteer": "^22.0.0",
     "playwright": "^1.47.0",
-    "jszip": "^3.10.1"
+    "jszip": "^3.10.1",
+    "esbuild": "^0.24.0"
   }
 }
