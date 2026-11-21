@@ -124,7 +124,7 @@ function ask(t,id){var c=cl(id),v=t==='p'?c.phone:c.email;if(!v)return;CV=v;var 
   else h='<a class="btn" href="mailto:'+qa(v)+'">✉️ שליחת אימייל</a>';
   $('sheetBody').innerHTML='<b>'+esc(c.name)+'</b><span class="m" dir="ltr">'+esc(v)+'</span>'+h+'<button class="ghost" onclick="cp(this)">העתקה</button><button class="ghost" onclick="closeS()">ביטול</button>';$('sheet').hidden=false}
 function cp(b){try{navigator.clipboard.writeText(CV).then(function(){b.textContent='הועתק'})}catch(e){b.textContent='ההעתקה נכשלה'}}
-function closeS(){$('sheet').hidden=true}
+function closeS(){var s=$('sheet');if(s.dataset.lock)return;s.hidden=true}
 var CID=null;
 function openC(id){CID=id;render();window.scrollTo(0,0)}
 function closeC(){CID=null;render()}

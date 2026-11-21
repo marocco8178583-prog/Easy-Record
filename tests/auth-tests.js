@@ -8,7 +8,7 @@ function body(q){return new Promise(r=>{let b='';q.on('data',c=>b+=c);q.on('end'
 const api=http.createServer(async(q,s)=>{s.setHeader('Access-Control-Allow-Origin','*');s.setHeader('Access-Control-Allow-Headers','*');s.setHeader('Access-Control-Allow-Methods','*');if(q.method==='OPTIONS'){s.statusCode=204;return s.end()}
  const b=await body(q),u=q.url,j=(c,o)=>{s.statusCode=c;s.setHeader('content-type','application/json');s.end(JSON.stringify(o))};log.push(q.method+' '+u.split('?')[0]+' key:'+(q.headers.apikey||'').slice(0,4));
  const id=b.email||b.phone;
- if(u.startsWith('/auth/v1/signup')){if(users[id])return j(422,{error_code:'user_already_exists',msg:'User already registered'});if((b.password||'').length<8)return j(422,{error_code:'weak_password',msg:'weak'});users[id]={pw:b.password,id:'u'+Object.keys(users).length,confirmed:autoConfirm};if(!autoConfirm){return j(200,{id:users[id].id,email:b.email})}
+ if(u.startsWith('/auth/v1/signup')){if(users[id])return j(422,{error_code:'user_already_exists',msg:'User already registered'});if((b.password||'').length<8)return j(422,{error_code:'weak_password',msg:'weak'});users[id]={pw:b.password,id:'u'+Object.keys(users).length,confirmed:autoConfirm,md:b.data||{}};if(!autoConfirm){return j(200,{id:users[id].id,email:b.email})}
   return j(200,sess(id))}
  if(u.startsWith('/auth/v1/token?grant_type=password')){const x=users[id];if(!x||x.pw!==b.password)return j(400,{error_code:'invalid_credentials',msg:'Invalid login credentials'});if(!x.confirmed)return j(400,{error_code:'email_not_confirmed',msg:'Email not confirmed'});return j(200,sess(id))}
  if(u.startsWith('/auth/v1/settings'))return j(200,{external:{google:true,apple:false,email:true}});
@@ -20,9 +20,9 @@ const api=http.createServer(async(q,s)=>{s.setHeader('Access-Control-Allow-Origi
   if(q.method==='DELETE'){if(x.factors.some(y=>y.status==='verified')&&f.status==='verified'&&aalOf[t]!=='aal2')return j(403,{error_code:'insufficient_aal'});x.factors=x.factors.filter(y=>y!==f);return j(200,{id:f.id})}
   return j(405,{})}
  if(u.startsWith('/auth/v1/logout')){loggedOut.push((q.headers.authorization||'').slice(7));return j(204,{})}
- if(u.startsWith('/auth/v1/user')&&q.method==='GET'){const t=(q.headers.authorization||'').slice(7);if(t==='CONFIRMTOK')return j(200,{id:'u-conf',email:'new@b.co'});if(tokens[t]){const x=users[tokens[t]];return j(200,{id:x.id,email:tokens[t],factors:x.factors||[]})}return j(401,{})}
+ if(u.startsWith('/auth/v1/user')&&q.method==='GET'){const t=(q.headers.authorization||'').slice(7);if(t==='CONFIRMTOK')return j(200,{id:'u-conf',email:'new@b.co'});if(tokens[t]){const x=users[tokens[t]];return j(200,{id:x.id,email:tokens[t],factors:x.factors||[],user_metadata:x.md||{}})}return j(401,{})}
  if(u.startsWith('/auth/v1/recover')){mailSent.push(b.email);return j(200,{})}
- if(u.startsWith('/auth/v1/user')&&q.method==='PUT'){const t=(q.headers.authorization||'').slice(7),i=tokens[t]||(t==='RECOVERYTOK'?'a@b.co':null);if(!i)return j(401,{msg:'bad'});users[i].pw=b.password;return j(200,{})}
+ if(u.startsWith('/auth/v1/user')&&q.method==='PUT'){const t=(q.headers.authorization||'').slice(7),i=tokens[t]||(t==='RECOVERYTOK'?'a@b.co':null);if(!i)return j(401,{msg:'bad'});if(b.password)users[i].pw=b.password;if(b.data&&users[i])users[i].md=Object.assign(users[i].md||{},b.data);return j(200,{})}
  if(u.startsWith('/rest/v1/rpc/delete_my_account')){const t=(q.headers.authorization||'').slice(7);if(!tokens[t])return j(401,{});deleted.push(tokens[t]);delete users[tokens[t]];return j(200,{})}
  j(404,{})});
 (async()=>{await new Promise(r=>api.listen(0,r));const API='http://localhost:'+api.address().port;
@@ -38,7 +38,7 @@ const api=http.createServer(async(q,s)=>{s.setHeader('Access-Control-Allow-Origi
  const v=async(f,...a)=>{for(let i=0;i<3;i++){try{await ready();return await p.evaluate(f,...a)}catch(e){if(i===2||!/context|navigation|not defined|not a function/i.test(e.message))throw e;await sleep(500)}}};
  ok('מסך פתיחה: שער מוצג, והאפליקציה חסומה מאחוריו',await v(()=>!document.getElementById('gate').hidden&&document.querySelector('main').hasAttribute('inert')));
  ok('מסך פתיחה מכיל לוגו, שדה אימייל/טלפון וסיסמה, כניסה, הרשמה ושכחתי סיסמה',await v(()=>!!document.querySelector('#gate img.logoI, #gate svg')&&!!gId&&!!gPw&&gIn.offsetParent&&/הרשמה/.test(gLinks.textContent)&&/שכחתי/.test(gLinks.textContent)));
- const fill=async(id,pw,pw2)=>{await v((a,b,c)=>{gId.value=a;gPw.value=b;gPw2.value=c||'';gFn.value='דניאל';gLn.value='מרוקו';gDob.value='1990-05-20'},id,pw,pw2)};
+ const fill=async(id,pw,pw2)=>{await v((a,b,c)=>{gId.value=a;gPw.value=b;gPw2.value=c||'';gFn.value='דניאל';gLn.value='מרוקו';gDob.value='1990-05-20';gTerms.checked=true},id,pw,pw2)};
  await v(()=>gSignIn());await sleep(100);ok('כניסה עם שדות ריקים: הודעת שגיאה, אין קריאת רשת',await v(()=>/אימייל או טלפון/.test(document.getElementById('gErr').textContent))&&log.filter(l=>!l.includes('settings')).length===0,log.join());
  await fill('not-an-email','12345678');await v(()=>gSignIn());ok('אימייל לא תקין נדחה בצד לקוח',await v(()=>/לא תקינה/.test(document.getElementById('gErr').textContent))&&log.filter(l=>!l.includes('settings')).length===0);
  await fill('a@b.co','12345678');await v(()=>gSignIn());await sleep(400);ok('כניסה עם משתמש לא קיים: שגיאה כללית, נשארים בשער',await v(()=>/שגויים/.test(document.getElementById('gErr').textContent)&&!gate.hidden));

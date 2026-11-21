@@ -30,16 +30,23 @@
     <div class="gf" style="position:relative"><input id="gPw" type="password" dir="ltr" autocomplete="current-password" placeholder="סיסמה" aria-label="סיסמה"><button type="button" id="gEyeB" class="ghost" aria-label="הצגת הסיסמה" aria-pressed="false" onclick="gEye()">👁</button></div>
     <input id="gPw2" type="password" dir="ltr" autocomplete="new-password" placeholder="אימות סיסמה" aria-label="אימות סיסמה" hidden>
     <div class="gf" id="gCodeW" hidden><input id="gCode" dir="ltr" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="קוד בן 6 ספרות" aria-label="קוד אימות דו־שלבי"></div>
+    <div id="gOtpT" hidden><small class="m" style="display:block;line-height:1.6" id="gOtpTx"></small></div>
+    <label class="gTerms" id="gTermsW" hidden><input type="checkbox" id="gTerms"> <span>קראתי ואני מאשר/ת את <a href="terms.html" target="_blank" rel="noopener">תנאי השימוש (התקנון)</a> ואת <a href="privacy.html" target="_blank" rel="noopener">מדיניות הפרטיות</a> של Easy Record</span></label>
     <div id="gErr" role="alert" aria-live="polite"></div>
     <button class="full" id="gIn" onclick="gSignIn()">כניסה</button>
     <button class="full" id="gUp" onclick="gSignUp()" hidden>יצירת חשבון</button>
     <button class="full" id="gFg" onclick="gForgot()" hidden>שליחת קישור לאיפוס</button>
     <button class="full" id="gRs" onclick="gReset()" hidden>שמירת סיסמה חדשה</button>
     <button class="full" id="gMf" onclick="gMfa()" hidden>אישור הקוד</button>
+    <button class="full" id="gOt" onclick="gOtpSend()" hidden>שליחת קוד</button>
+    <button class="full" id="gVf" onclick="gOtpVerify()" hidden>אישור הקוד וכניסה</button>
+    <div id="gVfL" hidden style="display:flex;justify-content:space-between;width:100%;gap:8px;font-size:15px"><a href="#" id="gRe" onclick="gOtpResend();return false">שליחה חוזרת</a><a href="#" onclick="gMode(OTP&&OTP.kind==='signup'?'up':'otp');return false">שינוי פרטים</a></div>
     <a href="#" id="gMfX" hidden onclick="gMode('in');return false">ביטול</a>
     <div id="gOA" hidden><button class="ghost full" id="gGoogle" onclick="gOAuth('google')" hidden>המשך עם Google</button><button class="ghost full" id="gApple" onclick="gOAuth('apple')" hidden>המשך עם Apple</button></div>
-    <div id="gLinks"><a href="#" id="gToUp" onclick="gMode(document.getElementById('gate').dataset.mode==='up'?'in':'up');return false">הרשמה</a><a href="#" onclick="gMode('forgot');return false">שכחתי את הסיסמה</a><a href="#" onclick="gMode('in');return false" id="gBack">כניסה</a></div>
+    <div id="gLinks"><a href="#" id="gToUp" onclick="gMode(document.getElementById('gate').dataset.mode==='up'?'in':'up');return false">הרשמה</a><a href="#" onclick="gMode('forgot');return false">שכחתי את הסיסמה</a><a href="#" onclick="gMode('in');return false" id="gBack">כניסה עם סיסמה</a></div>
+    <a href="#" id="gToOtp" onclick="gMode('otp');return false">כניסה עם קוד ב-SMS או באימייל (בלי סיסמה)</a>
     <a href="#" id="gLocal" onclick="gLocal();return false">המשך בלי חשבון</a>
+    <small class="m" id="gLegal"><a href="terms.html" target="_blank" rel="noopener">תקנון ותנאי שימוש</a> · <a href="privacy.html" target="_blank" rel="noopener">מדיניות פרטיות</a></small>
   </div>
 </div>
 <main>

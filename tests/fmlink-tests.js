@@ -11,6 +11,7 @@ const api=http.createServer(async(q,s)=>{s.setHeader('Access-Control-Allow-Origi
   const b=await body(q),u=q.url.split('?')[0],auth=(q.headers.authorization||'').slice(7),j=(c,o)=>{s.statusCode=c;s.setHeader('content-type','application/json');s.end(JSON.stringify(o))};
   if(u.startsWith('/functions/v1/findmedic'))calls.push({m:q.method,u:u.replace('/functions/v1/findmedic',''),auth,b});
   if(u==='/auth/v1/settings')return j(200,{external:{email:true}});
+  if(u==='/auth/v1/user')return auth==='TOK'?j(200,{id:'u1',email:'worker@example.com',factors:[],user_metadata:{terms_version:'2026-11-21'}}):j(401,{});
   if(u==='/auth/v1/token'&&/refresh_token/.test(q.url)){refreshes++;await new Promise(r=>setTimeout(r,150));if(b.refresh_token!=='R')return j(400,{error_code:'refresh_token_already_used'});return j(200,{access_token:'TOK',refresh_token:'R2',expires_in:3600,user:{id:'u1',email:'worker@example.com'}})}
   if(u.startsWith('/rest/v1/records')&&auth==='OLD')return j(401,{message:'JWT expired'});
   if(u==='/auth/v1/user')return auth==='TOK'?j(200,{id:'u1',email:'worker@example.com',factors:[]}):j(401,{});

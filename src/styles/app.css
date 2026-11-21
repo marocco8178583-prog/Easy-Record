@@ -80,6 +80,7 @@ button,.btn{min-height:44px;border-radius:14px}
 #gLocal{font-size:14px;color:var(--mute);margin-top:8px}
 #gate[data-mode="up"] #gToUp{font-weight:800}
 #gate[data-mode="in"] #gBack{visibility:hidden}
+.gTerms{display:flex;gap:8px;align-items:flex-start;text-align:start;font-size:14px;line-height:1.6;width:100%}.gTerms[hidden],#gOtpT[hidden],#gVfL[hidden]{display:none!important}.gTerms input{width:auto!important;margin-top:4px;flex:none}.gTerms a,#gLegal a,#gToOtp{color:var(--ink);font-weight:600}#gLegal{display:block;text-align:center}
 nav svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block;margin:0 auto}
 #rmb{cursor:pointer}
 .trendbar{cursor:pointer}.trendbar:focus-visible{outline:2px solid var(--ink)}
