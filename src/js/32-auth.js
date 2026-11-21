@@ -19,7 +19,7 @@ function aId(v){v=String(v||'').trim();if(!v)return {err:'הזן אימייל א
 function gErr(t,good){var e=$('gErr');e.textContent=t||'';if(t){try{sndPlay(good?'save':'err')}catch(x){}}e.style.color=good?'var(--ok)':'var(--owe)'}
 function gBusy(b){[].forEach.call(document.querySelectorAll('#gate button'),function(x){x.disabled=b})}
 function gShow(on){var g=$('gate');g.hidden=!on;var m=document.querySelector('main'),n=$('nav');[m,n].forEach(function(x){if(!x)return;if(on)x.setAttribute('inert','');else x.removeAttribute('inert')});if(on){if(!RECOV)gMode('in');setTimeout(function(){var i=$('gId');if(i&&!RECOV)i.focus()},50)}}
-function gMode(m){RECOV=m==='reset'?RECOV:null;if(m!=='mfa')PENDS=null;var mf=m==='mfa';$('gId').parentNode.hidden=m==='reset'||mf;$('gPw').parentNode.hidden=m==='forgot'||mf;$('gPw2').hidden=m!=='reset'&&m!=='up';$('gProf').hidden=m!=='up';
+function gMode0(m){RECOV=m==='reset'?RECOV:null;if(m!=='mfa')PENDS=null;var mf=m==='mfa';$('gId').parentNode.hidden=m==='reset'||mf;$('gPw').parentNode.hidden=m==='forgot'||mf;$('gPw2').hidden=m!=='reset'&&m!=='up';$('gProf').hidden=m!=='up';
   $('gIn').hidden=m!=='in';$('gUp').hidden=m!=='up';$('gFg').hidden=m!=='forgot';$('gRs').hidden=m!=='reset';$('gLinks').hidden=m==='reset'||mf;
   $('gCodeW').hidden=!mf;$('gMf').hidden=!mf;$('gMfX').hidden=!mf;$('gLocal').hidden=mf;$('gOA').hidden=!(m==='in'||m==='up')||!(OAP.google||OAP.apple);$('gGoogle').hidden=!OAP.google;$('gApple').hidden=!OAP.apple;
   $('gPw').autocomplete=m==='up'||m==='reset'?'new-password':'current-password';$('gPw').placeholder=m==='reset'?'סיסמה חדשה (8 תווים לפחות)':'סיסמה';gErr('');$('gate').dataset.mode=m;if(m==='up')setTimeout(function(){var f=$('gFn');if(f&&!f.value)f.focus()},50);if(mf){$('gCode').value='';setTimeout(function(){$('gCode').focus()},50)}}
@@ -33,11 +33,12 @@ function gProfile(){var p={fname:nmClean($('gFn').value),lname:nmClean($('gLn').
   if(!p.fname)return {err:'הזן שם פרטי'};if(!p.lname)return {err:'הזן שם משפחה'};var de=dobErr(p.dob);if(de)return {err:de};return p}
 function profApply(p){if(!p)return;var ch=false;['fname','lname','nick','dob'].forEach(function(k){if(p[k]&&!S[k]){S[k]=p[k];ch=true}});if(ch){save();try{render()}catch(e){}}}
 function profFromUser(u){var m=u&&u.user_metadata||{};return {fname:nmClean(m.first_name||m.given_name||''),lname:nmClean(m.last_name||m.family_name||''),nick:nmClean(m.nickname||''),dob:/^\d{4}-\d{2}-\d{2}$/.test(m.birth_date||'')?m.birth_date:''}}
-async function gSignUp(){var pf=gProfile();if(pf.err)return gErr(pf.err);var id=aId($('gId').value),pw=$('gPw').value;if(id.err)return gErr(id.err);if(pw.length<8)return gErr('הסיסמה חייבת להכיל לפחות 8 תווים');if(pw!==$('gPw2').value)return gErr('הסיסמאות לא זהות');if(!authCfg())return gErr('שירות החשבונות עדיין לא הוגדר באתר הזה. אפשר להמשיך בלי חשבון.');
-  gBusy(true);gErr('');var r=await aFetch('/auth/v1/signup','POST',Object.assign({password:pw,data:{first_name:pf.fname,last_name:pf.lname,nickname:pf.nick,birth_date:pf.dob}},id.email?{email:id.email}:{phone:id.phone}));gBusy(false);if(!r.ok)return gErr(aErr(r));
+async function gSignUp(){var pf=gProfile();if(pf.err)return gErr(pf.err);var id=aId($('gId').value),pw=$('gPw').value;if(id.err)return gErr(id.err);if(pw.length<8)return gErr('הסיסמה חייבת להכיל לפחות 8 תווים');if(pw!==$('gPw2').value)return gErr('הסיסמאות לא זהות');if(!$('gTerms').checked)return gErr('כדי להירשם יש לאשר את תנאי השימוש ומדיניות הפרטיות');if(!authCfg())return gErr('שירות החשבונות עדיין לא הוגדר באתר הזה. אפשר להמשיך בלי חשבון.');
+  gBusy(true);gErr('');var r=await aFetch('/auth/v1/signup','POST',Object.assign({password:pw,data:Object.assign({first_name:pf.fname,last_name:pf.lname,nickname:pf.nick,birth_date:pf.dob},termsMeta())},id.email?{email:id.email}:{phone:id.phone}));gBusy(false);if(!r.ok)return gErr(aErr(r));
   try{localStorage.setItem('er-pendprof',JSON.stringify(pf))}catch(e){}
   var s=aSess(r.data);if(s){aSet(s);try{localStorage.removeItem(LOCALK)}catch(e){}$('gPw').value=$('gPw2').value='';await aAfterLogin();return}
-  gMode('in');gErr(id.email?'נרשמת. שלחנו אימייל אישור, לחץ על הקישור ואז התחבר.':'נרשמת. אשר את הקוד שנשלח ב-SMS ואז התחבר.',true)}
+  if(id.phone){OTP={phone:id.phone,kind:'signup'};gMode('code');gErr('נרשמת. שלחנו קוד ב-SMS למספר '+id.phone+'. הזן אותו כדי לאשר את החשבון.',true);return}
+  gMode('in');gErr('נרשמת. שלחנו אימייל אישור, לחץ על הקישור ואז התחבר.',true)}
 async function gForgot(){var id=aId($('gId').value);if(id.err)return gErr(id.err);if(!id.email)return gErr('איפוס סיסמה נשלח באימייל. הזן את כתובת האימייל.');if(!authCfg())return gErr('שירות החשבונות עדיין לא הוגדר באתר הזה.');
   gBusy(true);var r=await aFetch('/auth/v1/recover?redirect_to='+encodeURIComponent(typeof natRedirect==='function'?natRedirect():location.origin+location.pathname),'POST',{email:id.email});gBusy(false);
   if(r.net||r.status===429)return gErr(aErr(r));gMode('in');gErr('אם קיים חשבון עם האימייל הזה, נשלח אליו קישור לאיפוס הסיסמה.',true)}
@@ -63,7 +64,7 @@ function aGate(){try{localStorage.removeItem(LOCALK)}catch(e){}gShow(true)}
 /* After any successful sign-in: make sure the data on screen belongs to this account. Guest data is never moved into an account without an explicit choice. */
 /* after sign-in (and after any account switch), fill name / nickname / birth date from the account profile — only into empty fields, only for the signed-in account */
 function profAfter(){try{var s=aGet();if(!s||!s.user||owner()!==s.user.id)return;var pp=localStorage.getItem('er-pendprof');profApply(profFromUser(s.user));if(pp){profApply(JSON.parse(pp));localStorage.removeItem('er-pendprof')}}catch(e){}}
-async function aAfterLogin(boot){await aAfterLogin0(boot);profAfter()}
+async function aAfterLogin(boot){await aAfterLogin0(boot);profAfter();termsCheck()}
 async function aAfterLogin0(boot){var s=aGet();if(!s||!s.user)return;var uid=s.user.id,o=owner();
   if(o===uid){gShow(false);renderAcct();if(!boot)aBackend();return}
   if(o==='guest'&&!hasData()&&!(await stGet(uid))){try{localStorage.setItem(OWNK,uid)}catch(e){}gShow(false);renderAcct();aBackend();return}
@@ -110,3 +111,50 @@ async function mfaOn(fid){var s=aGet(),code=($('mfC').value||'').replace(/\D/g,'
 async function mfaOff(fid){var s=aGet(),code=($('mfC').value||'').replace(/\D/g,'');if(code.length!==6){$('mfE').textContent='הזן קוד נוכחי בן 6 ספרות';return}var v=await mfaVerify(fid,code,s.access_token);
   if(!v.ok||!v.data.access_token){$('mfE').textContent=v.net?aErr(v):'הקוד שגוי.';return}var ns=aSess(v.data)||{};if(!ns.user||!ns.user.id)ns.user=s.user;if(!ns.refresh_token)ns.refresh_token=s.refresh_token;aSet(ns);
   var r=await aFetch('/auth/v1/factors/'+fid,'DELETE',null,ns.access_token);if(!r.ok){$('mfE').textContent=aErr(r);return}closeS();renderAcct();info('אימות דו־שלבי כובה.')}
+
+
+/* ---- sign-in with a one-time code (SMS or email), phone confirmation at sign-up, and terms acceptance ----
+   /auth/v1/otp sends the code (SMS to a phone, or an email that contains the code and a sign-in link); /auth/v1/verify signs in.
+   New users can be created this way too, so the terms checkbox is required here as on the sign-up form.
+   Acceptance is kept in the account (user_metadata.terms_version / terms_accepted_at). Signed-in users who have not
+   accepted the current version (older accounts, Google / Apple sign-in) are asked once after sign-in. */
+var TERMS_VERSION='2026-11-21',OTP=null,OTPCD=0;
+function termsMeta(){return {terms_version:TERMS_VERSION,terms_accepted_at:new Date().toISOString()}}
+function gMode(m){var otp=m==='otp',code=m==='code';gMode0(otp||code?'forgot':m);$('gate').dataset.mode=m;
+  $('gFg').hidden=true;$('gOt').hidden=!otp;$('gVf').hidden=!code;$('gVfL').hidden=!code;
+  if(otp||code){$('gPw').parentNode.hidden=true;$('gPw2').hidden=true}
+  if(code){$('gId').parentNode.hidden=true;$('gLinks').hidden=true;$('gLocal').hidden=true;$('gCodeW').hidden=false;$('gCode').value='';$('gCode').setAttribute('aria-label','קוד אימות');setTimeout(function(){$('gCode').focus()},50)}
+  else if(m!=='mfa')$('gCode').setAttribute('aria-label','קוד אימות דו־שלבי');
+  if(!code&&m!=='mfa')$('gCodeW').hidden=true;
+  $('gTermsW').hidden=!(m==='up'||otp);if(!(m==='up'||otp))$('gTerms').checked=false;
+  $('gToOtp').hidden=!(m==='in'||m==='up');$('gBack').textContent=otp?'כניסה עם סיסמה':'כניסה';
+  $('gOtpT').hidden=!(otp||code);
+  if(otp)$('gOtpTx').textContent='הזן אימייל או מספר טלפון. נשלח אליך קוד בן 6 ספרות (ב-SMS או באימייל). אם אין לך עדיין חשבון, הוא ייווצר.';
+  if(code&&OTP)$('gOtpTx').textContent='הזן את הקוד שנשלח אל '+(OTP.email||OTP.phone)+(OTP.email?' (אפשר גם ללחוץ על הקישור שבאימייל).':'.');
+  gOtpCd()}
+function gOtpCd(){var a=$('gRe');if(!a)return;if(OTPCD>0){a.textContent='שליחה חוזרת בעוד '+OTPCD+' שניות';a.style.pointerEvents='none';a.style.opacity=.6}else{a.textContent='שליחה חוזרת';a.style.pointerEvents='';a.style.opacity=''}}
+function gOtpTick(){OTPCD=60;gOtpCd();var t=setInterval(function(){OTPCD--;gOtpCd();if(OTPCD<=0)clearInterval(t)},1000)}
+async function gOtpReq(){var body=Object.assign({create_user:true,data:termsMeta()},OTP.email?{email:OTP.email}:{phone:OTP.phone});
+  if(OTP.kind==='signup')return aFetch('/auth/v1/resend','POST',{type:'sms',phone:OTP.phone});
+  return aFetch('/auth/v1/otp'+(OTP.email?'?redirect_to='+encodeURIComponent(typeof natRedirect==='function'?natRedirect():location.origin+location.pathname):''),'POST',body)}
+async function gOtpSend(){var id=aId($('gId').value);if(id.err)return gErr(id.err);if(!$('gTerms').checked)return gErr('כדי להמשיך יש לאשר את תנאי השימוש ומדיניות הפרטיות');if(!authCfg())return gErr('שירות החשבונות עדיין לא הוגדר באתר הזה. אפשר להמשיך בלי חשבון.');
+  OTP={email:id.email,phone:id.phone,kind:'login'};gBusy(true);gErr('');var r=await gOtpReq();gBusy(false);
+  if(!r.ok)return gErr(r.data&&/provider|sms/i.test((r.data.msg||r.data.message||r.data.error_code||'')+'')&&id.phone?'שליחת SMS עדיין לא זמינה. אפשר להיכנס עם אימייל.':aErr(r));
+  gOtpTick();gMode('code')}
+async function gOtpResend(){if(!OTP||OTPCD>0)return;gBusy(true);var r=await gOtpReq();gBusy(false);if(!r.ok)return gErr(aErr(r));gOtpTick();gErr(OTP.email?'שלחנו אימייל חדש.':'שלחנו קוד חדש.',true)}
+async function gOtpVerify(){if(!OTP)return gMode('otp');var c=String($('gCode').value||'').replace(/\D/g,'');if(c.length!==6)return gErr('הזן את הקוד בן 6 הספרות');
+  gBusy(true);gErr('');var r=await aFetch('/auth/v1/verify','POST',OTP.email?{type:'email',email:OTP.email,token:c}:{type:'sms',phone:OTP.phone,token:c});gBusy(false);
+  var s=r.ok&&aSess(r.data);if(!s)return gErr(r.status===403||r.status===400||r.status===401?'הקוד שגוי או שפג תוקפו. אפשר לבקש קוד חדש.':aErr(r));
+  $('gCode').value='';OTP=null;if(needMfa(r.data.user,s.access_token)){PENDS=s;PENDS.fid=mfaFid(r.data.user);var ps=PENDS;gMode('mfa');PENDS=ps;return}
+  aSet(s);try{localStorage.removeItem(LOCALK)}catch(e){}await aAfterLogin()}
+/* terms: ask once per account and version */
+async function termsCheck(){if(!authCfg())return;var s=aGet();if(!s||!s.access_token)return;try{if(localStorage.getItem('er-terms-'+s.user.id)===TERMS_VERSION)return}catch(e){}
+  var r=await aFetch('/auth/v1/user','GET',null,s.access_token);if(!r.ok)return;var md=r.data.user_metadata||{};
+  if(md.terms_version===TERMS_VERSION){try{localStorage.setItem('er-terms-'+s.user.id,TERMS_VERSION)}catch(e){}return}
+  var tryShow=function(){var sh=$('sheet'),g=$('gate');if((sh&&!sh.hidden)||(g&&!g.hidden)){setTimeout(tryShow,800);return}
+    $('sheetBody').innerHTML='<b>אישור תנאי השימוש</b><small class="m" style="display:block;line-height:1.7">כדי להמשיך להשתמש ב-Easy Record עם החשבון שלך, יש לקרוא ולאשר את <a href="terms.html" target="_blank" rel="noopener">תנאי השימוש (התקנון)</a> ואת <a href="privacy.html" target="_blank" rel="noopener">מדיניות הפרטיות</a>.</small><label class="gTerms"><input type="checkbox" id="tmOk"> <span>קראתי ואני מאשר/ת</span></label><small id="tmErr" role="alert" style="color:var(--owe)"></small><button onclick="termsAccept()">אישור והמשך</button><button class="ghost" onclick="termsDecline()">לא מאשר/ת (יציאה מהחשבון)</button>';
+    sh.hidden=false;sh.dataset.lock='1'};tryShow()}
+async function termsAccept(){if(!$('tmOk').checked){$('tmErr').textContent='יש לסמן "קראתי ואני מאשר/ת"';return}var s=aGet();if(!s)return closeS();
+  var r=await aFetch('/auth/v1/user','PUT',{data:termsMeta()},s.access_token);if(!r.ok){$('tmErr').textContent='השמירה נכשלה: '+aErr(r);return}
+  try{localStorage.setItem('er-terms-'+s.user.id,TERMS_VERSION)}catch(e){}var sh=$('sheet');if(sh)delete sh.dataset.lock;closeS();info('תודה, האישור נשמר.')}
+function termsDecline(){var sh=$('sheet');if(sh)delete sh.dataset.lock;closeS();aOut()}

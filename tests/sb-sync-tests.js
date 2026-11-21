@@ -35,7 +35,7 @@ const api=http.createServer(async(q,s)=>{s.setHeader('Access-Control-Allow-Origi
  await new Promise(r=>web.listen(0,r));const base='http://localhost:'+web.address().port+'/';
  const b=await puppeteer.launch({args:['--no-sandbox']});const errs=[];
  async function dev(){const c=await b.createBrowserContext();const p=await c.newPage();p.on('pageerror',e=>errs.push(e.message));await p.goto(base);await sleep(600);return p}
- const sign=async(p,id,pw,up)=>{await p.evaluate((i,w,u)=>{gId.value=i;gPw.value=w;gPw2.value=w;if(u){gMode('up');gFn.value='א';gLn.value='ב';gDob.value='1990-01-01'}return u?gSignUp():gSignIn()},id,pw,up);await sleep(700)};
+ const sign=async(p,id,pw,up)=>{await p.evaluate((i,w,u)=>{gId.value=i;gPw.value=w;gPw2.value=w;if(u){gMode('up');gFn.value='א';gLn.value='ב';gDob.value='1990-01-01';gTerms.checked=true}return u?gSignUp():gSignIn()},id,pw,up);await sleep(700)};
  const D1=await dev(),D2=await dev();
  await sign(D1,'a@b.co','password1',true);
  ok('D1 נרשם ומחובר לענן (CDB פעיל)',await D1.evaluate(()=>!!CDB&&!!SBDB));

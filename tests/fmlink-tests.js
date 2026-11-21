@@ -11,7 +11,7 @@ const api=http.createServer(async(q,s)=>{s.setHeader('Access-Control-Allow-Origi
   const b=await body(q),u=q.url.split('?')[0],auth=(q.headers.authorization||'').slice(7),j=(c,o)=>{s.statusCode=c;s.setHeader('content-type','application/json');s.end(JSON.stringify(o))};
   if(u.startsWith('/functions/v1/findmedic'))calls.push({m:q.method,u:u.replace('/functions/v1/findmedic',''),auth,b});
   if(u==='/auth/v1/settings')return j(200,{external:{email:true}});
-  if(u==='/auth/v1/user')return auth==='TOK'?j(200,{id:'u1',email:'worker@example.com',factors:[]}):j(401,{});
+  if(u==='/auth/v1/user')return auth==='TOK'?j(200,{id:'u1',email:'worker@example.com',factors:[],user_metadata:{terms_version:'2026-11-21'}}):j(401,{});
   if(u.startsWith('/rest/v1/'))return j(200,[]);
   if(u==='/functions/v1/findmedic/oauth/approve'){if(auth!=='TOK')return j(401,{error:'unauthorized'});return j(200,{redirect:FM_CB+'?code=CODE123&state='+encodeURIComponent(b.state)})}
   if(u==='/functions/v1/findmedic/oauth/deny'){if(auth!=='TOK')return j(401,{});return j(200,{redirect:FM_CB+'?error=access_denied&state='+encodeURIComponent(b.state)})}
