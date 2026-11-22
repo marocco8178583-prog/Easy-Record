@@ -96,7 +96,8 @@ async function clientIdFor(userId: string, name: string) {
 }
 
 type Shift = { operation?: string; external_assignment_id?: string; title?: string; employer_name?: string; date?: string;
-  planned_start?: string; planned_end?: string; agreed_compensation_agorot?: number; map_link?: string; status?: string; payment_state?: string };
+  planned_start?: string; planned_end?: string; actual_start?: string; actual_end?: string;
+  agreed_compensation_agorot?: number; map_link?: string; status?: string; payment_state?: string };
 const hhmm = (iso?: string) => {
   if (!iso) return '';
   const d = new Date(iso); if (isNaN(+d)) return '';
@@ -106,7 +107,8 @@ const hhmm = (iso?: string) => {
 // absent here, so an update never blanks or zeroes a value the worker typed in the app.
 function shiftFields(s: Shift) {
   const f: Record<string, unknown> = { date: s.date! };
-  const t1 = hhmm(s.planned_start), t2 = hhmm(s.planned_end);
+  // Real check-in / check-out times (Find Medic 0.5) win over the planned ones once they exist.
+  const t1 = hhmm(s.actual_start) || hhmm(s.planned_start), t2 = hhmm(s.actual_end) || hhmm(s.planned_end);
   if (t1) f.t1 = t1;
   if (t2) f.t2 = t2;
   if (Number.isSafeInteger(s.agreed_compensation_agorot) && s.agreed_compensation_agorot! >= 0) f.amount = f.rate = s.agreed_compensation_agorot! / 100;

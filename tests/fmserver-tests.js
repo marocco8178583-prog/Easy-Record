@@ -84,6 +84,17 @@ let handler; globalThis.Deno = { env: { get: () => 'x' }, serve: h => { handler 
   r = await call('POST', '/v1/shifts/ext:' + ext(1) + '/complete', shift(1, { date: '2026-12-03', planned_start: '2026-12-03T07:00:00Z', agreed_compensation_agorot: 90000 }));
   ok('סיום משמרת בלי שינוי לא כותב מחדש את היום', entry(id1).ver === ver && entry(id1).data.data.amount === 1000, JSON.stringify(entry(id1).data.data));
 
+  // 4b. actual hours: check-in / check-out times from Find Medic replace the planned ones
+  r = await call('POST', '/v1/shifts', shift(4)); const id4 = r.body.id;
+  ok('בלי שעות בפועל: השעות המתוכננות', entry(id4).data.data.t1 === '08:00' && entry(id4).data.data.t2 === '16:00', JSON.stringify(entry(id4).data.data));
+  r = await call('PATCH', '/v1/shifts/ext:' + ext(4), shift(4, { actual_start: '2026-12-01T05:52:00Z' }));
+  d = entry(id4).data.data;
+  ok('צ׳ק-אין: שעת ההתחלה בפועל נרשמת, הסיום עדיין מתוכנן', d.t1 === '07:52' && d.t2 === '16:00', JSON.stringify(d));
+  r = await call('POST', '/v1/shifts/ext:' + ext(4) + '/complete', shift(4, { actual_start: '2026-12-01T05:52:00Z', actual_end: '2026-12-01T14:37:00Z' }));
+  d = entry(id4).data.data;
+  ok('צ׳ק-אאוט: שעת הסיום בפועל נרשמת', d.t1 === '07:52' && d.t2 === '16:37', JSON.stringify(d));
+  ok('שעות בפועל לא משנות סכום ותאריך', d.amount === 800 && d.date === '2026-12-01', JSON.stringify(d));
+
   // 5. pay not shared: an update without a sum never zeroes a typed sum
   r = await call('POST', '/v1/shifts', shift(2, { agreed_compensation_agorot: undefined })); const id2 = r.body.id;
   ok('משמרת בלי סכום נוצרת עם 0', entry(id2).data.data.amount === 0, JSON.stringify(entry(id2).data.data));
