@@ -42,7 +42,7 @@ const api=http.createServer(async(q,s)=>{s.setHeader('Access-Control-Allow-Origi
    await p.evaluate(f).catch(e=>{if(!/context was destroyed|navigation/i.test(e.message))throw e});await nav;
    await p.waitForFunction(()=>document.readyState==='complete'&&typeof gSignIn==='function',{timeout:15000}).catch(()=>{});await sleep(400)};
  // The app may reload itself right after signing in; that is not a failure, so wait for the page to settle instead of crashing.
- const sign=async(p,id,pw,up)=>{try{await p.evaluate((i,w,u)=>{gId.value=i;gPw.value=w;gPw2.value=w;if(u){gMode('up');gFn.value='א';gLn.value='ב';gDob.value='1990-01-01'}return u?gSignUp():gSignIn()},id,pw,up)}catch(e){if(!/context was destroyed|navigation/i.test(e.message))throw e;await p.waitForFunction(()=>document.readyState==='complete'&&typeof gSignIn==='function',{timeout:8000}).catch(()=>{})}await sleep(700)};
+ const sign=async(p,id,pw,up)=>{try{await p.evaluate((i,w,u)=>{gBot.checked=true;gBotUpd();gId.value=i;gPw.value=w;gPw2.value=w;if(u){gMode('up');gFn.value='א';gLn.value='ב';gDob.value='1990-01-01'}return u?gSignUp():gSignIn()},id,pw,up)}catch(e){if(!/context was destroyed|navigation/i.test(e.message))throw e;await p.waitForFunction(()=>document.readyState==='complete'&&typeof gSignIn==='function',{timeout:8000}).catch(()=>{})}await sleep(700)};
  const D1=await dev(),D2=await dev();
  await sign(D1,'a@b.co','password1',true);
  ok('D1 נרשם ומחובר לענן (CDB פעיל)',await D1.evaluate(()=>!!CDB&&!!SBDB));

@@ -31,7 +31,8 @@
     <input id="gPw2" type="password" dir="ltr" autocomplete="new-password" placeholder="אימות סיסמה" aria-label="אימות סיסמה" hidden>
     <div class="gf" id="gCodeW" hidden><input id="gCode" dir="ltr" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="קוד בן 6 ספרות" aria-label="קוד אימות דו־שלבי"></div>
     <div id="gErr" role="alert" aria-live="polite"></div>
-    <button class="full" id="gIn" onclick="gSignIn()">כניסה</button>
+    <label class="gBot" id="gBotW"><input type="checkbox" id="gBot" onchange="gBotUpd()"> <span>אני לא רובוט</span></label>
+    <button class="full" id="gIn" onclick="gSignIn()" disabled>כניסה</button>
     <button class="full" id="gUp" onclick="gSignUp()" hidden>יצירת חשבון</button>
     <button class="full" id="gFg" onclick="gForgot()" hidden>שליחת קישור לאיפוס</button>
     <button class="full" id="gRs" onclick="gReset()" hidden>שמירת סיסמה חדשה</button>
