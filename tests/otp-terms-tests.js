@@ -41,7 +41,7 @@ const api=http.createServer(async(q,s)=>{s.setHeader('Access-Control-Allow-Origi
   ok('מצב קוד: שדה אימייל/טלפון, בלי סיסמה, עם תיבת אישור תקנון וכפתור שליחה',await E(p,()=>!document.getElementById('gId').parentNode.hidden&&document.getElementById('gPw').parentNode.hidden&&!document.getElementById('gTermsW').hidden&&!document.getElementById('gOt').hidden));
   const n0=calls.length;await E(p,()=>{gId.value='dana@example.com';gOtpSend()});await sleep(300);
   ok('בלי אישור התקנון: לא נשלח קוד ומוצגת הודעה',/תנאי השימוש/.test(await err(p))&&!calls.slice(n0).some(c=>c.u==='/auth/v1/otp'),await err(p));
-  await E(p,()=>{gTerms.checked=true;gOtpSend()});await sleep(500);let c=last('/auth/v1/otp');
+  await E(p,()=>{gTerms.checked=true;gBot.checked=true;gOtpSend()});await sleep(500);let c=last('/auth/v1/otp');
   ok('נשלח קוד לאימייל עם יצירת משתמש ואישור התקנון (גרסה ותאריך)',c&&c.b.email==='dana@example.com'&&c.b.create_user===true&&c.b.data.terms_version===TV&&!!c.b.data.terms_accepted_at,c&&c.b);
   ok('קוד באימייל: כתובת חזרה לאפליקציה (לקישור שבמייל)',c&&/redirect_to=/.test(c.q));
   ok('אחרי השליחה: מסך הזנת קוד עם הסבר, שליחה חוזרת ננעלת ל-60 שניות',await E(p,()=>!document.getElementById('gCodeW').hidden&&!document.getElementById('gVf').hidden&&/dana@example.com/.test(gOtpTx.textContent)&&/בעוד/.test(gRe.textContent)));
@@ -52,11 +52,11 @@ const api=http.createServer(async(q,s)=>{s.setHeader('Access-Control-Allow-Origi
   ok('משתמש שאישר תקנון בהרשמה בקוד: לא נשאל שוב',!(await sheet(p)));
 
   // ---- OTP by SMS
-  p=await open();await E(p,()=>{gMode('otp');gId.value='050-123-4567';gTerms.checked=true;gOtpSend()});await sleep(500);c=last('/auth/v1/otp');
+  p=await open();await E(p,()=>{gMode('otp');gId.value='050-123-4567';gTerms.checked=true;gBot.checked=true;gOtpSend()});await sleep(500);c=last('/auth/v1/otp');
   ok('קוד ב-SMS: מספר ישראלי מומר ל-E.164',c&&c.b.phone==='+972501234567'&&!c.b.email,c&&c.b);
   await E(p,()=>{gCode.value='654321';gOtpVerify()});await sleep(1200);c=last('/auth/v1/verify');
   ok('קוד ב-SMS: אימות type=sms ונכנסים',c&&c.b.type==='sms'&&c.b.phone==='+972501234567'&&await E(p,()=>gate.hidden),c&&c.b);
-  smsBroken=true;p=await open();await E(p,()=>{gMode('otp');gId.value='0521112222';gTerms.checked=true;gOtpSend()});await sleep(500);
+  smsBroken=true;p=await open();await E(p,()=>{gMode('otp');gId.value='0521112222';gTerms.checked=true;gBot.checked=true;gOtpSend()});await sleep(500);
   ok('אין ספק SMS בשרת: הודעה מובנת שמציעה אימייל',/SMS/.test(await err(p))&&/אימייל/.test(await err(p)),await err(p));smsBroken=false;
 
   // ---- sign-up: terms required, phone confirmation step
@@ -73,7 +73,7 @@ const api=http.createServer(async(q,s)=>{s.setHeader('Access-Control-Allow-Origi
 
   // ---- existing account without terms -> asked once after sign-in
   users['old@example.com']={id:'u-old',pw:'password1',md:{}};
-  p=await open();await E(p,()=>{gId.value='old@example.com';gPw.value='password1';gSignIn()});await sleep(1800);
+  p=await open();await E(p,()=>{gBot.checked=true;gId.value='old@example.com';gPw.value='password1';gSignIn()});await sleep(1800);
   let t=await sheet(p);ok('חשבון ישן בלי אישור: אחרי הכניסה מוצג מסך אישור תנאי השימוש',/אישור תנאי השימוש/.test(t)&&/התקנון/.test(t),t);
   await E(p,()=>document.getElementById('sheet').dispatchEvent(new MouseEvent('click',{bubbles:true})));await E(p,()=>closeS());await sleep(200);
   ok('אי אפשר לסגור את מסך האישור בלחיצה בחוץ',/אישור תנאי השימוש/.test(await sheet(p)));
@@ -81,10 +81,10 @@ const api=http.createServer(async(q,s)=>{s.setHeader('Access-Control-Allow-Origi
   ok('אישור בלי לסמן: הודעה, לא נשמר',/לסמן/.test(await E(p,()=>tmErr.textContent))&&!users['old@example.com'].md.terms_version);
   await E(p,()=>{tmOk.checked=true;termsAccept()});await sleep(600);
   ok('אישור: נשמר בחשבון והמסך נסגר',users['old@example.com'].md.terms_version===TV&&!/אישור תנאי השימוש/.test(await sheet(p)),users['old@example.com'].md);
-  p=await open();await E(p,()=>{gId.value='old@example.com';gPw.value='password1';gSignIn()});await sleep(1600);
+  p=await open();await E(p,()=>{gBot.checked=true;gId.value='old@example.com';gPw.value='password1';gSignIn()});await sleep(1600);
   ok('בכניסה הבאה לא נשאלים שוב',!/אישור תנאי השימוש/.test(await sheet(p)));
   users['no@example.com']={id:'u-no',pw:'password1',md:{}};
-  p=await open();await E(p,()=>{gId.value='no@example.com';gPw.value='password1';gSignIn()});await sleep(1800);await E(p,()=>termsDecline());await sleep(800);
+  p=await open();await E(p,()=>{gBot.checked=true;gId.value='no@example.com';gPw.value='password1';gSignIn()});await sleep(1800);await E(p,()=>termsDecline());await sleep(800);
   ok('לא מאשר: יוצאים מהחשבון וחוזרים למסך הכניסה',await E(p,()=>!aGet()&&!gate.hidden)&&!users['no@example.com'].md.terms_version);
 
   ok('אין שגיאות JavaScript',errs.length===0,errs);

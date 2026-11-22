@@ -25,14 +25,14 @@ function aErr(r){if(r.net)return navigator.onLine===false?'אין חיבור ל�
 function aId(v){v=String(v||'').trim();if(!v)return {err:'הזן אימייל או טלפון'};if(v.indexOf('@')<0&&/[a-z]/i.test(v))return {err:'כתובת האימייל לא תקינה'};if(v.indexOf('@')>=0){if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v))return {err:'כתובת האימייל לא תקינה'};return {email:v.toLowerCase()}}
   var p=normPhone(v,S.dcc);if(!p.ok||!p.e164)return {err:p.err||'הטלפון לא תקין. הוסף קידומת מדינה, למשל +972'};return {phone:p.e164}}
 function gErr(t,good){var e=$('gErr');e.textContent=t||'';if(t){try{sndPlay(good?'save':'err')}catch(x){}}e.style.color=good?'var(--ok)':'var(--owe)'}
-function gBusy(b){[].forEach.call(document.querySelectorAll('#gate button'),function(x){x.disabled=b})}
+function gBusy(b){[].forEach.call(document.querySelectorAll('#gate button'),function(x){x.disabled=b});if(!b)gBotUpd()}
 function gShow(on){var g=$('gate');g.hidden=!on;var m=document.querySelector('main'),n=$('nav');[m,n].forEach(function(x){if(!x)return;if(on)x.setAttribute('inert','');else x.removeAttribute('inert')});if(on){if(!RECOV)gMode('in');setTimeout(function(){var i=$('gId');if(i&&!RECOV)i.focus()},50)}}
 function gMode0(m){RECOV=m==='reset'?RECOV:null;if(m!=='mfa')PENDS=null;var mf=m==='mfa';$('gId').parentNode.hidden=m==='reset'||mf;$('gPw').parentNode.hidden=m==='forgot'||mf;$('gPw2').hidden=m!=='reset'&&m!=='up';$('gProf').hidden=m!=='up';
-  $('gIn').hidden=m!=='in';$('gUp').hidden=m!=='up';$('gFg').hidden=m!=='forgot';$('gRs').hidden=m!=='reset';$('gLinks').hidden=m==='reset'||mf;
+  $('gIn').hidden=m!=='in';$('gBotW').hidden=m!=='in';$('gBot').checked=false;gBotUpd();$('gUp').hidden=m!=='up';$('gFg').hidden=m!=='forgot';$('gRs').hidden=m!=='reset';$('gLinks').hidden=m==='reset'||mf;
   $('gCodeW').hidden=!mf;$('gMf').hidden=!mf;$('gMfX').hidden=!mf;$('gLocal').hidden=mf;$('gOA').hidden=!(m==='in'||m==='up')||!(OAP.google||OAP.apple);$('gGoogle').hidden=!OAP.google;$('gApple').hidden=!OAP.apple;
   $('gPw').autocomplete=m==='up'||m==='reset'?'new-password':'current-password';$('gPw').placeholder=m==='reset'?'סיסמה חדשה (8 תווים לפחות)':'סיסמה';gErr('');$('gate').dataset.mode=m;if(m==='up')setTimeout(function(){var f=$('gFn');if(f&&!f.value)f.focus()},50);if(mf){$('gCode').value='';setTimeout(function(){$('gCode').focus()},50)}}
 function gLocal(){try{localStorage.setItem(LOCALK,'1')}catch(e){}gShow(false);renderAcct()}
-async function gSignIn(){var id=aId($('gId').value),pw=$('gPw').value;if(id.err)return gErr(id.err);if(!pw)return gErr('הזן סיסמה');if(!authCfg())return gErr('שירות החשבונות עדיין לא הוגדר באתר הזה. אפשר להמשיך בלי חשבון.');
+async function gSignIn(){var id=aId($('gId').value),pw=$('gPw').value;if(id.err)return gErr(id.err);if(!pw)return gErr('הזן סיסמה');if(!authCfg())return gErr('שירות החשבונות עדיין לא הוגדר באתר הזה. אפשר להמשיך בלי חשבון.');if(!$('gBot').checked)return gErr('סמן את הריבוע "אני לא רובוט" כדי להיכנס');
   gBusy(true);gErr('');var r=await aFetch('/auth/v1/token?grant_type=password','POST',Object.assign({password:pw},id.email?{email:id.email}:{phone:id.phone}));gBusy(false);
   var s=r.ok&&aSess(r.data);if(!s)return gErr(aErr(r));$('gPw').value='';if(needMfa(r.data.user,s.access_token)){PENDS=s;PENDS.fid=mfaFid(r.data.user);var ps=PENDS;gMode('mfa');PENDS=ps;return}aSet(s);try{localStorage.removeItem(LOCALK)}catch(e){}await aAfterLogin()}
 function nmClean(v){return String(v||'').replace(/\s+/g,' ').trim().slice(0,30)}
@@ -89,7 +89,9 @@ function aDel(){cf('למחוק את החשבון בענן? הנתונים שבמ
   if(owner()===s.user.id)await profSwitch('guest',true);renderAcct();render();gShow(true);info('החשבון נמחק')})}
 /* Enter submits the visible action; eye button shows/hides the password */
 document.addEventListener('keydown',function(e){if(e.key!=='Enter'||$('gate').hidden||!/^(gId|gPw|gPw2|gCode)$/.test(e.target.id||''))return;e.preventDefault();var m=$('gate').dataset.mode;(m==='mfa'?gMfa:m==='up'?gSignUp:m==='forgot'?gForgot:m==='reset'?gReset:gSignIn)()});
-function gEye(){var p=$('gPw'),on=p.type==='password';p.type=on?'text':'password';$('gPw2').type=p.type;$('gEyeB').setAttribute('aria-pressed',on);$('gEyeB').textContent=on?'🙈':'👁'}
+function gEye(){var p=$('gPw'),on=p.type==='password';p.type=on?'text':'password';$('gPw2').type=p.type;$('gEyeB').setAttribute('aria-pressed',on);$('gEyeB').innerHTML=on?'<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#d93025"/><path d="M8 8l8 8M16 8l-8 8" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg>':'👁'}
+/* sign-in: the "I'm not a robot" box must be ticked before "sign in" works */
+function gBotUpd(){var b=$('gBot');if(!b)return;['gIn','gOt'].forEach(function(k){var x=$(k);if(x)x.disabled=!b.checked})}
 
 /* ===== OAuth (Google / Apple) via Supabase: buttons appear only for providers that are enabled in the project ===== */
 async function gProviders(){if(!authCfg())return;try{var r=await aFetch('/auth/v1/settings','GET');var x=(r.ok&&r.data&&r.data.external)||{};OAP={google:!!x.google,apple:!!x.apple};var m=$('gate').dataset.mode||'in';if(!$('gate').hidden&&(m==='in'||m==='up')){$('gOA').hidden=!(OAP.google||OAP.apple);$('gGoogle').hidden=!OAP.google;$('gApple').hidden=!OAP.apple}}catch(e){}}
@@ -129,7 +131,7 @@ async function mfaOff(fid){var s=aGet(),code=($('mfC').value||'').replace(/\D/g,
 var TERMS_VERSION='2026-11-21',OTP=null,OTPCD=0;
 function termsMeta(){return {terms_version:TERMS_VERSION,terms_accepted_at:new Date().toISOString()}}
 function gMode(m){var otp=m==='otp',code=m==='code';gMode0(otp||code?'forgot':m);$('gate').dataset.mode=m;
-  $('gFg').hidden=true;$('gOt').hidden=!otp;$('gVf').hidden=!code;$('gVfL').hidden=!code;
+  $('gFg').hidden=true;$('gOt').hidden=!otp;$('gBotW').hidden=!(m==='in'||otp);gBotUpd();$('gVf').hidden=!code;$('gVfL').hidden=!code;
   if(otp||code){$('gPw').parentNode.hidden=true;$('gPw2').hidden=true}
   if(code){$('gId').parentNode.hidden=true;$('gLinks').hidden=true;$('gLocal').hidden=true;$('gCodeW').hidden=false;$('gCode').value='';$('gCode').setAttribute('aria-label','קוד אימות');setTimeout(function(){$('gCode').focus()},50)}
   else if(m!=='mfa')$('gCode').setAttribute('aria-label','קוד אימות דו־שלבי');
@@ -145,7 +147,7 @@ function gOtpTick(){OTPCD=60;gOtpCd();var t=setInterval(function(){OTPCD--;gOtpC
 async function gOtpReq(){var body=Object.assign({create_user:true,data:termsMeta()},OTP.email?{email:OTP.email}:{phone:OTP.phone});
   if(OTP.kind==='signup')return aFetch('/auth/v1/resend','POST',{type:'sms',phone:OTP.phone});
   return aFetch('/auth/v1/otp'+(OTP.email?'?redirect_to='+encodeURIComponent(typeof natRedirect==='function'?natRedirect():location.origin+location.pathname):''),'POST',body)}
-async function gOtpSend(){var id=aId($('gId').value);if(id.err)return gErr(id.err);if(!$('gTerms').checked)return gErr('כדי להמשיך יש לאשר את תנאי השימוש ומדיניות הפרטיות');if(!authCfg())return gErr('שירות החשבונות עדיין לא הוגדר באתר הזה. אפשר להמשיך בלי חשבון.');
+async function gOtpSend(){var id=aId($('gId').value);if(id.err)return gErr(id.err);if(!$('gTerms').checked)return gErr('כדי להמשיך יש לאשר את תנאי השימוש ומדיניות הפרטיות');if(!authCfg())return gErr('שירות החשבונות עדיין לא הוגדר באתר הזה. אפשר להמשיך בלי חשבון.');if(!$('gBot').checked)return gErr('סמן את הריבוע "אני לא רובוט" כדי להיכנס');
   OTP={email:id.email,phone:id.phone,kind:'login'};gBusy(true);gErr('');var r=await gOtpReq();gBusy(false);
   if(!r.ok)return gErr(r.data&&/provider|sms/i.test((r.data.msg||r.data.message||r.data.error_code||'')+'')&&id.phone?'שליחת SMS עדיין לא זמינה. אפשר להיכנס עם אימייל.':aErr(r));
   gOtpTick();gMode('code')}

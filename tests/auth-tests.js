@@ -38,7 +38,8 @@ const api=http.createServer(async(q,s)=>{s.setHeader('Access-Control-Allow-Origi
  const v=async(f,...a)=>{for(let i=0;i<3;i++){try{await ready();return await p.evaluate(f,...a)}catch(e){if(i===2||!/context|navigation|not defined|not a function/i.test(e.message))throw e;await sleep(500)}}};
  ok('מסך פתיחה: שער מוצג, והאפליקציה חסומה מאחוריו',await v(()=>!document.getElementById('gate').hidden&&document.querySelector('main').hasAttribute('inert')));
  ok('מסך פתיחה מכיל לוגו, שדה אימייל/טלפון וסיסמה, כניסה, הרשמה ושכחתי סיסמה',await v(()=>!!document.querySelector('#gate img.logoI, #gate svg')&&!!gId&&!!gPw&&gIn.offsetParent&&/הרשמה/.test(gLinks.textContent)&&/שכחתי/.test(gLinks.textContent)));
- const fill=async(id,pw,pw2)=>{await v((a,b,c)=>{gId.value=a;gPw.value=b;gPw2.value=c||'';gFn.value='דניאל';gLn.value='מרוקו';gDob.value='1990-05-20';gTerms.checked=true},id,pw,pw2)};
+ const fill=async(id,pw,pw2)=>{await v((a,b,c)=>{gBot.checked=true;gBotUpd();gId.value=a;gPw.value=b;gPw2.value=c||'';gFn.value='דניאל';gLn.value='מרוקו';gDob.value='1990-05-20';gTerms.checked=true},id,pw,pw2)};
+ {const n0=log.length;await v(()=>{gMode('in');gId.value='a@b.co';gPw.value='12345678'});ok('ריבוע "אני לא רובוט" מוצג וכפתור הכניסה חסום עד שמסמנים',await v(()=>!gBotW.hidden&&!gBot.checked&&gIn.disabled));await v(()=>gSignIn());await sleep(150);ok('בלי סימון: הודעה ברורה ואין קריאת רשת',await v(()=>/לא רובוט/.test(document.getElementById('gErr').textContent))&&log.slice(n0).filter(l=>l.includes('/token')).length===0,log.slice(n0).join(','));await v(()=>{gBot.checked=true;gBot.dispatchEvent(new Event('change'))});ok('אחרי סימון כפתור הכניסה פעיל',await v(()=>!gIn.disabled));await v(()=>{gEye()});ok('כפתור הצגת הסיסמה: עיגול אדום עם איקס, בלי קוף',await v(()=>!!gEyeB.querySelector('svg circle')&&!/🙈/.test(gEyeB.textContent)));await v(()=>{gEye();gMode('in');gId.value='';gPw.value='';gBot.checked=true;gBotUpd()})}
  await v(()=>gSignIn());await sleep(100);ok('כניסה עם שדות ריקים: הודעת שגיאה, אין קריאת רשת',await v(()=>/אימייל או טלפון/.test(document.getElementById('gErr').textContent))&&log.filter(l=>!l.includes('settings')).length===0,log.join());
  await fill('not-an-email','12345678');await v(()=>gSignIn());ok('אימייל לא תקין נדחה בצד לקוח',await v(()=>/לא תקינה/.test(document.getElementById('gErr').textContent))&&log.filter(l=>!l.includes('settings')).length===0);
  await fill('a@b.co','12345678');await v(()=>gSignIn());await sleep(400);ok('כניסה עם משתמש לא קיים: שגיאה כללית, נשארים בשער',await v(()=>/שגויים/.test(document.getElementById('gErr').textContent)&&!gate.hidden));
@@ -109,7 +110,7 @@ const api=http.createServer(async(q,s)=>{s.setHeader('Access-Control-Allow-Origi
  await fill&&0;await v(()=>{localStorage.removeItem('er4-local');aGate()});await fill('0501234567','password1');
  // not configured
  cfg="{supabaseUrl:'',supabaseAnonKey:''}";const ctx2=await b.createBrowserContext();const p3=await ctx2.newPage();await p3.goto(base);await sleep(700);
- await p3.evaluate(()=>{gId.value='a@b.co';gPw.value='12345678';gSignIn()});await sleep(200);
+ await p3.evaluate(()=>{gBot.checked=true;gBotUpd();gId.value='a@b.co';gPw.value='12345678';gSignIn()});await sleep(200);
  ok('בלי הגדרת שירות: הודעה כנה ואפשרות להמשיך מקומית',await p3.evaluate(()=>/עדיין לא הוגדר/.test(document.getElementById('gErr').textContent)&&document.getElementById('gLocal').offsetParent!==null));
  ok('אין קריאות רשת סודיות: כל הבקשות נשלחו עם מפתח ה-anon בלבד',log.every(l=>l.endsWith('key:ANON')||l.endsWith('key:')),log.join('|'));
  ok('אין שגיאות JS',errs.length===0,errs.join('|'));
