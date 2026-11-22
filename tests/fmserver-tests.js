@@ -42,7 +42,9 @@ let handler; globalThis.Deno = { env: { get: () => 'x' }, serve: h => { handler 
 (async () => {
   let src = fs.readFileSync(path.join(__dirname, '..', 'cloud', 'supabase', 'functions', 'findmedic', 'index.ts'), 'utf8');
   src = src.replace(/import \{ createClient \} from 'npm:@supabase\/supabase-js@2';/, 'const { createClient } = globalThis.__mockSupabase;');
-  const js = (await esbuild.transform(src, { loader: 'ts', format: 'cjs' })).code;
+  // bundle, so the function's own local modules (e.g. ./payments.ts) are included
+  const dir = path.join(__dirname, '..', 'cloud', 'supabase', 'functions', 'findmedic');
+  const js = (await esbuild.build({ stdin: { contents: src, loader: 'ts', resolveDir: dir, sourcefile: 'index.ts' }, bundle: true, format: 'cjs', platform: 'neutral', write: false, logLevel: 'silent' })).outputFiles[0].text;
   new Function('require', js)(require);
   ok('קוד הפונקציה נטען', typeof handler === 'function', 'Deno.serve not called');
 

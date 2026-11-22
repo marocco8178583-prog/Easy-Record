@@ -62,7 +62,7 @@ async function authInit(){gProviders();try{if(!localStorage.getItem(OWNK)){var s
     gShow(true);gErr('האימייל אושר. אפשר להתחבר עם האימייל והסיסמה.',true);renderAcct();return}
   if(/error_description=/.test(h)){var em=/error_description=([^&]+)/.exec(h);try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}gShow(true);gErr('הקישור לא תקין או שפג תוקפו. נסה להתחבר, או בקש קישור חדש.');renderAcct();return}
   var s=aGet();if(s&&s.access_token){if(s.expires_at<Date.now()+60000&&s.refresh_token&&authCfg()){var r=await aFetch('/auth/v1/token?grant_type=refresh_token','POST',{refresh_token:s.refresh_token});
-      if(r.ok&&aSess(r.data))aSet(aSess(r.data));else if(!r.net&&r.status>=400&&r.status<500){aSet(null);gShow(true);renderAcct();return}}
+      if(r.ok&&aSess(r.data))aSet(aSess(r.data));else{var now=aGet();/* another tab may have renewed the sign-in a moment ago: keep that one */if(!(now&&now.access_token!==s.access_token)&&!r.net&&r.status>=400&&r.status<500){aSet(null);gShow(true);renderAcct();return}}}
     await aAfterLogin(true);return}
   var loc=false;try{loc=localStorage.getItem(LOCALK)==='1'}catch(e){}if(loc){gShow(false);renderAcct();return}gShow(true);renderAcct()}
 function renderAcct(){var b=$('acct');if(!b)return;var s=aGet();

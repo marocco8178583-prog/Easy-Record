@@ -35,7 +35,6 @@ const api=http.createServer(async(q,s)=>{s.setHeader('Access-Control-Allow-Origi
  await new Promise(r=>web.listen(0,r));const base='http://localhost:'+web.address().port+'/';
  const b=await puppeteer.launch({args:['--no-sandbox']});const errs=[];
  async function dev(){const c=await b.createBrowserContext();const p=await c.newPage();p.on('pageerror',e=>errs.push(e.message));await p.goto(base);await sleep(600);return p}
- const sign=async(p,id,pw,up)=>{await p.evaluate((i,w,u)=>{gId.value=i;gPw.value=w;gPw2.value=w;if(u){gMode('up');gFn.value='א';gLn.value='ב';gDob.value='1990-01-01';gTerms.checked=true}return u?gSignUp():gSignIn()},id,pw,up);await sleep(700)};
  // Signing out (aOut) and "continue without the guest data" (aMerge(false)) switch profiles by RELOADING the page.
  // Wait for that reload to finish instead of a fixed sleep: on a slow machine (GitHub's runners) the reload used to land
  // in the middle of the next step, which then ran on a page that was going away.
@@ -43,7 +42,7 @@ const api=http.createServer(async(q,s)=>{s.setHeader('Access-Control-Allow-Origi
    await p.evaluate(f).catch(e=>{if(!/context was destroyed|navigation/i.test(e.message))throw e});await nav;
    await p.waitForFunction(()=>document.readyState==='complete'&&typeof gSignIn==='function',{timeout:15000}).catch(()=>{});await sleep(400)};
  // The app may reload itself right after signing in; that is not a failure, so wait for the page to settle instead of crashing.
- const sign=async(p,id,pw,up)=>{try{await p.evaluate((i,w,u)=>{gId.value=i;gPw.value=w;gPw2.value=w;if(u){gMode('up');gFn.value='א';gLn.value='ב';gDob.value='1990-01-01'}return u?gSignUp():gSignIn()},id,pw,up)}catch(e){if(!/context was destroyed|navigation/i.test(e.message))throw e;await p.waitForFunction(()=>document.readyState==='complete'&&typeof gSignIn==='function',{timeout:8000}).catch(()=>{})}await sleep(700)};
+ const sign=async(p,id,pw,up)=>{try{await p.evaluate((i,w,u)=>{gId.value=i;gPw.value=w;gPw2.value=w;if(u){gMode('up');gFn.value='א';gLn.value='ב';gDob.value='1990-01-01';gTerms.checked=true}return u?gSignUp():gSignIn()},id,pw,up)}catch(e){if(!/context was destroyed|navigation/i.test(e.message))throw e;await p.waitForFunction(()=>document.readyState==='complete'&&typeof gSignIn==='function',{timeout:8000}).catch(()=>{})}await sleep(700)};
  const D1=await dev(),D2=await dev();
  await sign(D1,'a@b.co','password1',true);
  ok('D1 נרשם ומחובר לענן (CDB פעיל)',await D1.evaluate(()=>!!CDB&&!!SBDB));
