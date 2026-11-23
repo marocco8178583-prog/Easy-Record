@@ -8,4 +8,4 @@ initDb();
 remCheck();
 bgLoad();
 preUpSnap().then(preUpUI);
-try{applyHc()}catch(e){}
+try{applyHc()}catch(e){}try{applyNav()}catch(e){}
