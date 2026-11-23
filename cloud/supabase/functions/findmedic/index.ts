@@ -117,7 +117,8 @@ function shiftFields(s: Shift) {
 }
 // Fields the worker may change in the app (`rate` always moves together with `amount`). `fmv` keeps what Find Medic
 // last wrote to them: if the value in the app differs from it, the worker edited it, and Find Medic updates leave it alone.
-const OWNED = ['amount', 'note'] as const;
+// Hours too (beta.32): times the worker corrected in the app stay, even when real check-in/out times arrive later.
+const OWNED = ['amount', 'note', 't1', 't2'] as const;
 function entryFields(s: Shift) {
   const f = shiftFields(s);
   const base: Record<string, unknown> = { days: 1, rate: 0, amount: 0, t1: '', t2: '', ...f };
@@ -125,15 +126,18 @@ function entryFields(s: Shift) {
   return base;
 }
 // Merge a Find Medic update into the current work day.
-// Date and hours always follow Find Medic (the shift moved). Pay and note follow it only if the worker did not edit them.
+// The date always follows Find Medic (the shift moved). Hours, pay and note follow it only if the worker did not edit them.
 function mergeShift(cur: Record<string, unknown>, s: Shift) {
   const f = shiftFields(s), next: Record<string, unknown> = { ...cur };
-  for (const k of ['date', 't1', 't2']) if (k in f) next[k] = f[k];
+  if ('date' in f) next.date = f.date;
   const last = cur.fmv as Record<string, unknown> | undefined, fmv: Record<string, unknown> = { ...(last ?? {}) };
   for (const k of OWNED) {
     if (!(k in f)) continue;
     // Days written before `fmv` existed: we cannot tell an edit apart, so only fill in a pay of 0.
-    const edited = last ? cur[k] !== last[k] : (k === 'note' || Number(cur.amount) !== 0);
+    // Hours on days written before Find Medic's hours were tracked in `fmv`: they always followed Find Medic, so keep doing that.
+    const hour = k === 't1' || k === 't2';
+    const edited = hour ? !!last && k in last && cur[k] !== last[k]
+      : last ? cur[k] !== last[k] : (k === 'note' || Number(cur.amount) !== 0);
     if (!edited) { next[k] = f[k]; if (k === 'amount') next.rate = f.rate; }
     fmv[k] = f[k];
   }

@@ -95,6 +95,29 @@ let handler; globalThis.Deno = { env: { get: () => 'x' }, serve: h => { handler 
   ok('צ׳ק-אאוט: שעת הסיום בפועל נרשמת', d.t1 === '07:52' && d.t2 === '16:37', JSON.stringify(d));
   ok('שעות בפועל לא משנות סכום ותאריך', d.amount === 800 && d.date === '2026-12-01', JSON.stringify(d));
 
+  // 4c. hours the worker corrected in the app stay, even when real check-in/out times arrive later
+  r = await call('POST', '/v1/shifts', shift(5)); const id5 = r.body.id;
+  appEdit(id5, { t1: '07:30', t2: '17:00' });
+  r = await call('POST', '/v1/shifts/ext:' + ext(5) + '/complete', shift(5, { actual_start: '2026-12-01T05:52:00Z', actual_end: '2026-12-01T14:37:00Z' }));
+  d = entry(id5).data.data;
+  ok('שעות שתוקנו ביד לא נדרסות בשעות בפועל מ-Find Medic', d.t1 === '07:30' && d.t2 === '17:00', JSON.stringify(d));
+  // only the start was corrected: the end still follows Find Medic
+  r = await call('POST', '/v1/shifts', shift(6)); const id6 = r.body.id;
+  appEdit(id6, { t1: '07:45' });
+  r = await call('PATCH', '/v1/shifts/ext:' + ext(6), shift(6, { actual_end: '2026-12-01T14:37:00Z' }));
+  d = entry(id6).data.data;
+  ok('תוקנה רק שעת ההתחלה: היא נשארת, והסיום מתעדכן', d.t1 === '07:45' && d.t2 === '16:37', JSON.stringify(d));
+  // a reschedule moves the date but keeps corrected hours
+  r = await call('PATCH', '/v1/shifts/ext:' + ext(5), shift(5, { date: '2026-12-04', planned_start: '2026-12-04T08:00:00Z' }));
+  d = entry(id5).data.data;
+  ok('שינוי מועד מזיז את התאריך ושומר שעות שתוקנו', d.date === '2026-12-04' && d.t1 === '07:30', JSON.stringify(d));
+  // a day created before hours were tracked (fmv without t1/t2) keeps following Find Medic's hours
+  r = await call('POST', '/v1/shifts', shift(7)); const id7 = r.body.id;
+  { const rr = entry(id7); const fmv = { ...rr.data.data.fmv }; delete fmv.t1; delete fmv.t2; rr.data.data.fmv = fmv; }
+  r = await call('PATCH', '/v1/shifts/ext:' + ext(7), shift(7, { actual_start: '2026-12-01T05:52:00Z' }));
+  d = entry(id7).data.data;
+  ok('יום ישן (לפני מעקב שעות) ממשיך לקבל שעות מ-Find Medic', d.t1 === '07:52' && d.fmv.t1 === '07:52', JSON.stringify(d));
+
   // 5. pay not shared: an update without a sum never zeroes a typed sum
   r = await call('POST', '/v1/shifts', shift(2, { agreed_compensation_agorot: undefined })); const id2 = r.body.id;
   ok('משמרת בלי סכום נוצרת עם 0', entry(id2).data.data.amount === 0, JSON.stringify(entry(id2).data.data));

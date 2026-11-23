@@ -227,7 +227,10 @@
     <label for="scap">תקרת מחזור שנתי (₪)</label><input id="scap" type="number" min="0">
     <label for="sfy">תחילת שנת המס</label><select id="sfy" style="width:100%"><option value="0">ינואר</option><option value="1">פברואר</option><option value="2">מרץ</option><option value="3">אפריל</option><option value="4">מאי</option><option value="5">יוני</option><option value="6">יולי</option><option value="7">אוגוסט</option><option value="8">ספטמבר</option><option value="9">אוקטובר</option><option value="10">נובמבר</option><option value="11">דצמבר</option></select>
     <label for="scb">בסיס חישוב המחזור</label><select id="scb" style="width:100%"><option value="work">לפי תאריך העבודה</option><option value="paid">לפי תאריך התשלום (תקבולים)</option></select>
-    <p class="m">ברירת המחדל היא 122,833 ₪ (תקרת עוסק פטור ל-2026). זה מידע כללי בלבד ולא ייעוץ מס.</p></div>
+    <p class="m">ברירת המחדל היא 122,833 ₪ (תקרת עוסק פטור ל-2026). זה מידע כללי בלבד ולא ייעוץ מס.</p>
+    <label for="stx">כמה לשים בצד למס (בדשבורד)</label><select id="stx" style="width:100%"><option value="on">פעיל</option><option value="off">כבוי</option></select>
+    <label for="stxp">נקודות זיכוי</label><input id="stxp" type="number" min="0" max="20" step="0.25" inputmode="decimal">
+    <p class="m">לרוב 2.25 לגבר ו-2.75 לאישה. ילדים, תואר או מגורים ביישוב מזכה מוסיפים נקודות. אם אינך בטוח, שאל את רואה החשבון.</p></div>
   <div class="card"><b>מראה האפליקציה</b>
     <div class="tabs" id="thm" style="flex-wrap:wrap"><button data-th="sys" style="flex:1 1 45%">🌗 לפי המכשיר</button><button data-th="light" style="flex:1 1 45%">☀️ יום (לייט)</button><button data-th="dark" style="flex:1 1 45%">🌙 לילה (דארק)</button><button data-th="time" style="flex:1 1 45%">🕐 אוטומטי לפי שעה</button></div>
     <p class="m" id="thn"></p></div>

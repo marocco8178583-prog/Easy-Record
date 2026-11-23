@@ -86,3 +86,5 @@ $('sco').onchange=function(){S.capOn=this.value!=='off';save();render()};
 $('scap').onchange=function(){S.cap=+this.value||122833;save();render()};
 $('sfy').onchange=function(){S.fy=+this.value||0;save();render()};
 $('scb').onchange=function(){S.cb=this.value;save();render()};
+$('stx').onchange=function(){S.txOn=this.value!=='off';save();render()};
+$('stxp').onchange=function(){var p=parseFloat(this.value);S.txPts=isFinite(p)&&p>=0&&p<=20?p:2.25;this.value=S.txPts;try{delete DIRTY[fKey(this)]}catch(e){}save();render()};
