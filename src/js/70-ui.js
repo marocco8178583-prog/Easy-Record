@@ -195,7 +195,7 @@ function wipe(){cf('למחוק את כל הנתונים? נוצר גיבוי א�
 $('ktabs').onclick=function(e){var b=e.target.closest('button');if(b&&b.dataset.k){CKIND=b.dataset.k;render()}};
 $('nav').onclick=function(e){var b=e.target.closest('button');if(b&&b.id==='pwrB'){pwrToggle();return}if(b){tab=b.dataset.t;if(tab==='cli')CID=null;render();window.scrollTo(0,0)}};
 $('ftabs').onclick=function(e){if(e.target.dataset.f){filt=e.target.dataset.f;render()}};
-function render(){try{derive()}catch(e){}try{if(tab==='cal')setTimeout(rDayView,0)}catch(e){}try{remCheck()}catch(e){}try{rDebts()}catch(e){}$('roBan').hidden=!RO;renderCfb();renderStatus();['pay','dash','cal','clock','cli','set'].forEach(function(v){$('v-'+v).hidden=v!==tab});
+function render(){try{if(!NOSAVE&&expRecur())setTimeout(save,0)}catch(e){}try{derive()}catch(e){}try{if(tab==='cal')setTimeout(rDayView,0)}catch(e){}try{remCheck()}catch(e){}try{rDebts()}catch(e){}$('roBan').hidden=!RO;renderCfb();renderStatus();['pay','dash','cal','clock','cli','set'].forEach(function(v){$('v-'+v).hidden=v!==tab});
   [].forEach.call($('nav').children,function(b){if(b.id==='pwrB')return;b.className=b.dataset.t===tab?'on':''});try{pwrSync()}catch(e){}
   if(tab==='pay'){rPay();rMon();rOd();rCapB()}if(tab==='cal')rCal();if(tab==='cli')rCli();if(tab==='set')rSet();if(tab==='dash')rDash();if(tab==='clock')rClock();clkTick()}
 /* Keep what the user is typing. Background re-renders (cloud sync, polling, timers) rebuild screens from saved data; without this, a half-edited field
