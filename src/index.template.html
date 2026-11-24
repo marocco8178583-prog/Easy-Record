@@ -100,6 +100,7 @@
       <label for="xC">קטגוריה</label><input id="xC" list="xCats" autocomplete="off" placeholder="דלק, כלים, חומרים, ביטוח..."><datalist id="xCats"></datalist>
       <label for="xCl">לקוח קשור (לא חובה)</label><select id="xCl" style="width:100%"></select>
       <label for="xN">הערה (לא חובה)</label><input id="xN" autocomplete="off">
+      <div id="xVatW" hidden><label for="xVat">מע״מ בהוצאה</label><select id="xVat" style="width:100%"><option value="1">יש בה מע״מ (כלול בסכום)</option><option value="0">בלי מע״מ</option></select></div>
       <label for="xRep">חוזרת?</label><select id="xRep" style="width:100%"><option value="0">חד-פעמית</option><option value="1">כל חודש (תתווסף לבד בכל חודש)</option></select>
       <div id="xErr" class="owe" role="alert"></div>
       <button class="full" onclick="expAdd()">הוספת הוצאה</button>
@@ -128,6 +129,10 @@
     <small class="m" style="display:block;margin:4px 0 8px">קובץ ZIP אחד: אקסל עם הכנסות, תקבולים, הוצאות לפי קטגוריה וסיכום שנתי, ובנוסף כל הקבלות של השנה.</small>
     <label for="accY">שנה</label><select id="accY" style="width:100%"></select>
     <div class="acts"><button id="accBtn" onclick="accGo()">הורדת קובץ לרואה החשבון</button></div></div>
+  <div class="card" id="icsCard"><b>ייצוא ימי עבודה ליומן</b>
+    <small class="m" style="display:block;margin:4px 0 8px">קובץ שנפתח ביומן של הטלפון (Google, אייפון, Outlook). ייצוא חוזר מעדכן את אותם אירועים ולא מכפיל אותם.</small>
+    <label for="icsR">אילו ימים</label><select id="icsR" style="width:100%"><option value="future">מהיום והלאה</option><option value="30">30 הימים האחרונים והלאה</option><option value="all">הכול</option></select>
+    <div class="acts"><button id="icsBtn" onclick="icsGo()">הורדת קובץ ליומן</button></div></div>
 </section>
 
 <section id="v-clock" hidden>
@@ -232,7 +237,12 @@
     <p class="m">ברירת המחדל היא 122,833 ₪ (תקרת עוסק פטור ל-2026). זה מידע כללי בלבד ולא ייעוץ מס.</p>
     <label for="stx">כמה לשים בצד למס (בדשבורד)</label><select id="stx" style="width:100%"><option value="on">פעיל</option><option value="off">כבוי</option></select>
     <label for="stxp">נקודות זיכוי</label><input id="stxp" type="number" min="0" max="20" step="0.25" inputmode="decimal">
-    <p class="m">לרוב 2.25 לגבר ו-2.75 לאישה. ילדים, תואר או מגורים ביישוב מזכה מוסיפים נקודות. אם אינך בטוח, שאל את רואה החשבון.</p></div>
+    <p class="m">לרוב 2.25 לגבר ו-2.75 לאישה. ילדים, תואר או מגורים ביישוב מזכה מוסיפים נקודות. אם אינך בטוח, שאל את רואה החשבון.</p>
+    <label for="svat">מע״מ (עוסק מורשה)</label><select id="svat" style="width:100%"><option value="off">כבוי</option><option value="on">פעיל</option></select>
+    <div id="svatW" hidden><label for="svatR">שיעור מע״מ (%)</label><input id="svatR" type="number" min="0" max="50" step="0.5" inputmode="decimal">
+      <label for="svatI">הסכומים בימי העבודה</label><select id="svatI" style="width:100%"><option value="exc">לפני מע״מ</option><option value="inc">כוללים מע״מ</option></select>
+      <label for="svatP">דיווח למע״מ</label><select id="svatP" style="width:100%"><option value="2">כל חודשיים</option><option value="1">כל חודש</option></select></div>
+    <label for="spn">פנסיה וקרן השתלמות (בדשבורד)</label><select id="spn" style="width:100%"><option value="on">פעיל</option><option value="off">כבוי</option></select></div>
   <div class="card"><b>מראה האפליקציה</b>
     <div class="tabs" id="thm" style="flex-wrap:wrap"><button data-th="sys" style="flex:1 1 45%">🌗 לפי המכשיר</button><button data-th="light" style="flex:1 1 45%">☀️ יום (לייט)</button><button data-th="dark" style="flex:1 1 45%">🌙 לילה (דארק)</button><button data-th="time" style="flex:1 1 45%">🕐 אוטומטי לפי שעה</button></div>
     <p class="m" id="thn"></p></div>

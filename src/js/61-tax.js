@@ -8,7 +8,8 @@
    known year is used and the card says so (taxRates().stale). */
 var TAX26={y:2026,pt:2904,
   br:[[84120,.10],[120720,.14],[228000,.20],[301200,.31],[560280,.35],[721560,.47],[Infinity,.50]],
-  blLow:7703,blMax:51910,niLow:.0447,hiLow:.0323,niHigh:.1283,hiHigh:.0517,niDed:.52};
+  blLow:7703,blMax:51910,niLow:.0447,hiLow:.0323,niHigh:.1283,hiHigh:.0517,niDed:.52,
+  pnHalf:6884.5,pnAvg:13769,pnLow:.0445,pnHigh:.1255,pnQ:232800,pnDedR:.11,pnCrR:.055,khR:.045,khMax:293397,khDed:13203,khFree:20566};
 var TAXR={2026:TAX26};
 function taxRates(y){y=y||new Date().getFullYear();var ks=Object.keys(TAXR).map(Number).sort(),k=ks[0];ks.forEach(function(x){if(x<=y)k=x});return {R:TAXR[k],y:k,stale:y>k}}
 function taxBr(x,R){R=R||taxRates().R;var t=0,lo=0;R.br.forEach(function(b){if(x>lo)t+=(Math.min(x,b[0])-lo)*b[1];lo=b[0]});return t}
@@ -26,8 +27,9 @@ function taxPaidY(y){var t=0;taxPaidL().forEach(function(x){if(+x.d.slice(0,4)==
    is for the VAT-exempt ceiling) */
 function taxInfo(){var now=new Date(),y=now.getFullYear(),r={s:new Date(y,0,1),e:new Date(y+1,0,1)},inc=0,exp=0,tr=taxRates(y);
   function inR(s){var a=(s||'').split('-'),dt=new Date(+a[0],a[1]-1,+a[2]);return dt>=r.s&&dt<r.e&&dt<=now}
-  if(S.cb==='paid')S.pays.forEach(function(p){if(inR(p.date))inc+=+p.amount||0});else S.entries.forEach(function(e){if(inR(e.date))inc+=+e.amount||0});
-  (S.expenses||[]).forEach(function(x){if(inR(x.date))exp+=+x.amount||0});
+  var nI=function(a){return S.vatOn?vatSplitInc(a).net:+a||0},nX=function(x){return S.vatOn?vatSplitExp(x).net:+x.amount||0};  // with VAT on: profit without the VAT
+  if(S.cb==='paid')S.pays.forEach(function(p){if(inR(p.date))inc+=nI(p.amount)});else S.entries.forEach(function(e){if(inR(e.date))inc+=nI(e.amount)});
+  (S.expenses||[]).forEach(function(x){if(inR(x.date))exp+=nX(x)});
   var prof=Math.max(inc-exp,0),mo=Math.min(Math.max((now-r.s)/(864e5*30.44),1),12),  // at least one month, so early-year numbers don't explode
       P=prof/mo*12,c=taxCalc(P,taxPts(),tr.R),sofar=c.total*mo/12,paid=taxPaidY(y);
   return {inc:inc,exp:exp,prof:prof,P:P,c:c,sofar:sofar,month:c.total/12,rate:P?c.total/P*100:0,r:r,tr:tr,paid:paid,left:Math.max(sofar-paid,0)}}
