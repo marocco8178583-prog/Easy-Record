@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Easy Record · יומן שכר</title>
-<link rel="icon" type="image/png" href="icons/favicon-48.png?v=5.0.0-beta.35">
+<link rel="icon" type="image/png" href="icons/favicon-48.png?v=5.0.0-beta.36">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Easy Record">
 <meta name="theme-color" content="#12302d">
 <script src="config.js" onerror="void 0"></script>
-<link rel="manifest" href="manifest.webmanifest?v=5.0.0-beta.35">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=5.0.0-beta.35">
+<link rel="manifest" href="manifest.webmanifest?v=5.0.0-beta.36">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=5.0.0-beta.36">
 <script>
 /*!
 
@@ -503,7 +503,7 @@ html[data-nav] #toast{bottom:calc(20px + env(safe-area-inset-bottom,0px))}
 </nav>
 <script>
 /* ===== module: 00-core.js ===== */
-var APP_VER='5.0.0-beta.35',KEY='er4-v3',LEGACY_KEY='workdays-v1',SCHEMA=3,NOSAVE=false,MIGERR='',S=null,tab='clock',filt='unpaid',OP={},selD,cal;
+var APP_VER='5.0.0-beta.36',KEY='er4-v3',LEGACY_KEY='workdays-v1',SCHEMA=3,NOSAVE=false,MIGERR='',S=null,tab='clock',filt='unpaid',OP={},selD,cal;
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S||!S.entries){try{S=JSON.parse(localStorage.getItem(LEGACY_KEY))}catch(e){S=null}}
 if(!S||!S.entries)S={rate:600,entries:[],clients:[]};
@@ -1265,10 +1265,10 @@ function expIn(pre){return (S.expenses||[]).filter(function(x){return !pre||x.da
 function expSum(l){return l.reduce(function(s,x){return s+c100(x.amount)},0)/100}
 function incIn(pre){var s=0;S.entries.forEach(function(e){if(!pre||e.date.indexOf(pre)===0)s+=c100(e.amount)});return s/100}
 function expAdd(){var a=c100($('xA').value)/100,d=$('xD').value||today(),c=$('xC').value.replace(/\s+/g,' ').trim()||'אחר',er=$('xErr');er.textContent='';if(!(a>0)){er.textContent='הזן סכום גדול מאפס';return $('xA').focus()}
-  var x={id:uid(),date:d,amount:a,cat:c,note:$('xN').value.trim(),cid:+$('xCl').value||0},rp=$('xRep'),xv=$('xVat');if(S.vatOn&&xv&&xv.value==='0')x.nv=1;if(rp&&rp.value==='1'){x.rep=1;x.rpTo=d.slice(0,7)}S.expenses=S.expenses||[];S.expenses.push(x);expRecur();$('xA').value=$('xN').value='';if(rp){rp.value='0';try{delete DIRTY[fKey(rp)]}catch(e){}}save();render()}
+  var x={id:uid(),date:d,amount:a,cat:c,note:$('xN').value.trim(),cid:+$('xCl').value||0},rp=$('xRep'),xv=$('xVat');if(S.vatOn&&xv&&xv.value==='0')x.nv=1;if(rp&&rp.value==='1'){x.rep=1;x.rpTo=x.rp0=d.slice(0,7)}S.expenses=S.expenses||[];S.expenses.push(x);expRecur();$('xA').value=$('xN').value='';if(rp){rp.value='0';try{delete DIRTY[fKey(rp)]}catch(e){}}save();render()}
 function expDel(id){var x=(S.expenses||[]).find(function(y){return y.id===id});if(!x)return;cf('למחוק את ההוצאה ('+nis(x.amount)+', '+x.cat+')?'+(x.rep?' היא לא תתווסף יותר בחודשים הבאים (מה שכבר נוסף נשאר).':''),function(){S.expenses.splice(S.expenses.indexOf(x),1);tombAdd('x',x);save();render()})}
 function expEdit(id){var x=(S.expenses||[]).find(function(y){return y.id===id});if(!x)return;$('sheetBody').innerHTML='<b>עריכת הוצאה</b><label for="xeA">סכום (₪)</label><input id="xeA" type="number" inputmode="decimal" value="'+x.amount+'"><label for="xeD">תאריך</label><input id="xeD" type="date" value="'+x.date+'"><label for="xeC">קטגוריה</label><input id="xeC" list="xCats" value="'+qa(x.cat)+'"><label for="xeN">הערה</label><input id="xeN" value="'+qa(x.note||'')+'">'+(S.vatOn?'<label for="xeV">מע״מ בהוצאה</label><select id="xeV" style="width:100%"><option value="1">יש בה מע״מ (כלול בסכום)</option><option value="0"'+(x.nv?' selected':'')+'>בלי מע״מ</option></select>':'')+(x.rpOf?'<small class="m">נוספה אוטומטית מהוצאה קבועה.</small>':'<label for="xeR">חוזרת?</label><select id="xeR" style="width:100%"><option value="0">חד-פעמית</option><option value="1"'+(x.rep?' selected':'')+'>כל חודש</option></select>')+'<div id="xeE" class="owe"></div><button onclick="expEditGo('+id+')">שמירה</button><button class="ghost" onclick="closeS()">ביטול</button>';$('sheet').hidden=false}
-function expEditGo(id){var x=(S.expenses||[]).find(function(y){return y.id===id}),a=c100($('xeA').value)/100;if(!x)return;if(!(a>0)){$('xeE').textContent='הזן סכום גדול מאפס';return}x.amount=a;x.date=$('xeD').value||x.date;x.cat=$('xeC').value.replace(/\s+/g,' ').trim()||'אחר';x.note=$('xeN').value.trim();var xv=$('xeV');if(xv){if(xv.value==='0')x.nv=1;else delete x.nv}var r=$('xeR');if(r){if(r.value==='1'){if(!x.rep){x.rep=1;x.rpTo=x.date.slice(0,7)}}else if(x.rep){delete x.rep;delete x.rpTo}}expRecur();closeS();save();render()}
+function expEditGo(id){var x=(S.expenses||[]).find(function(y){return y.id===id}),a=c100($('xeA').value)/100;if(!x)return;if(!(a>0)){$('xeE').textContent='הזן סכום גדול מאפס';return}if(x.rep&&!/^\d{4}-\d{2}$/.test(x.rp0||'')&&/^\d{4}-\d{2}/.test(x.date||''))x.rp0=x.date.slice(0,7);x.amount=a;x.date=$('xeD').value||x.date;x.cat=$('xeC').value.replace(/\s+/g,' ').trim()||'אחר';x.note=$('xeN').value.trim();var xv=$('xeV');if(xv){if(xv.value==='0')x.nv=1;else delete x.nv}var r=$('xeR');if(r){if(r.value==='1'){if(!x.rep){x.rep=1;x.rpTo=x.rp0=x.date.slice(0,7)}}else if(x.rep){delete x.rep;delete x.rpTo;delete x.rp0}}expRecur();closeS();save();render()}
 function rExp(){if(PSUB!=='exp')return;var now=new Date(),fm=$('xFm'),fy=$('xFy');
   if(!fm.options.length){fm.innerHTML='<option value="">כל השנה</option>'+MN.map(function(n,i){return '<option value="'+String(i+1).padStart(2,'0')+'">'+n+'</option>'}).join('');fm.value=String(now.getMonth()+1).padStart(2,'0');var h='';for(var y=2020;y<=now.getFullYear()+1;y++)h+='<option>'+y+'</option>';fy.innerHTML=h;fy.value=String(now.getFullYear())}
   if(!$('xD').value)$('xD').value=today();try{$('xVatW').hidden=!S.vatOn}catch(e){}
@@ -1282,15 +1282,20 @@ function rExp(){if(PSUB!=='exp')return;var now=new Date(),fm=$('xFm'),fy=$('xFy'
 
 /* recurring expenses: an expense with rep:1 is the template. Each month after it (up to this month, never a future date) gets a
    copy on the same day of the month (the last day if the month is shorter). Copies have a fixed id (template id + months since
-   the template), so two devices that both add the same month end up with the same record, not two. rpTo = last month already
-   added, so a copy the user deleted is not added again. Returns true when something was added. */
-function expRecur(){if(typeof RO!=='undefined'&&RO)return false;var L=S.expenses=S.expenses||[],now=today(),cm=now.slice(0,7),ch=false;
-  L.filter(function(x){return x.rep&&/^\d{4}-\d{2}-\d{2}$/.test(x.date||'')}).forEach(function(t){var y0=+t.date.slice(0,4),m0=+t.date.slice(5,7)-1,day=+t.date.slice(8,10),
-    from=/^\d{4}-\d{2}$/.test(t.rpTo||'')&&t.rpTo>t.date.slice(0,7)?t.rpTo:t.date.slice(0,7),k0=(+from.slice(0,4)-y0)*12+(+from.slice(5,7)-1-m0);
-    for(var k=k0+1;k<=k0+60;k++){var yy=y0+Math.floor((m0+k)/12),mm=(m0+k)%12,last=new Date(yy,mm+1,0).getDate(),
-      d=yy+'-'+String(mm+1).padStart(2,'0')+'-'+String(Math.min(day,last)).padStart(2,'0');if(d>now)break;
-      var id=t.id+k;if(!L.some(function(z){return z.id===id})&&!(S.tomb&&S.tomb[kf('x',id)])){var cp={id:id,date:d,amount:t.amount,cat:t.cat,note:t.note||'',cid:t.cid||0,rpOf:t.id};if(t.nv)cp.nv=1;L.push(cp)}
-      t.rpTo=d.slice(0,7);ch=true}});
+   rp0, the template's first month), so two devices that both add the same month end up with the same record, not two. rp0 stays
+   fixed when the user later changes the template's date, so the ids of later months don't shift onto ids already used (that
+   used to skip a month). rpTo = last month already added, so a copy the user deleted is not added again. A month that already
+   has a copy of this template is never given a second one. Returns true when something was added. */
+function expRecur(){if(typeof RO!=='undefined'&&RO)return false;var L=S.expenses=S.expenses||[],now=today(),ch=false,ym=/^\d{4}-\d{2}$/;
+  var mi=function(s){return +s.slice(0,4)*12+(+s.slice(5,7)-1)};
+  L.filter(function(x){return x.rep&&/^\d{4}-\d{2}-\d{2}$/.test(x.date||'')}).forEach(function(t){var dm=t.date.slice(0,7),day=+t.date.slice(8,10);
+    if(!ym.test(t.rp0||''))t.rp0=dm;
+    var o=mi(t.rp0),from=ym.test(t.rpTo||'')&&t.rpTo>dm?t.rpTo:dm,f=mi(from),has={};
+    L.forEach(function(z){if(z.rpOf===t.id&&typeof z.date==='string')has[z.date.slice(0,7)]=1});
+    for(var n=f+1;n<=f+60;n++){var yy=Math.floor(n/12),mm=n%12,last=new Date(yy,mm+1,0).getDate(),mo=yy+'-'+String(mm+1).padStart(2,'0'),
+      d=mo+'-'+String(Math.min(day,last)).padStart(2,'0');if(d>now)break;
+      var id=t.id+(n-o);if(!has[mo]&&!L.some(function(z){return z.id===id})&&!(S.tomb&&S.tomb[kf('x',id)])){var cp={id:id,date:d,amount:t.amount,cat:t.cat,note:t.note||'',cid:t.cid||0,rpOf:t.id};if(t.nv)cp.nv=1;L.push(cp);has[mo]=1}
+      t.rpTo=mo;ch=true}});
   return ch}
 
 /* ===== module: 54-projects.js ===== */
@@ -1865,10 +1870,10 @@ function xlsxRows(R){return [[R.title],[R.sub],[],R.cols].concat(R.rows.map(func
 
 /* ===== module: 63-accountant.js ===== */
 /* Yearly export for the accountant: one ZIP with an Excel workbook (summary, income by work day, payments received, expenses, expenses by category, by client) and the year's receipt files.
-   The tax year follows the "tax year start" setting (S.fy). Internal summary only, not accounting or tax advice. */
-function accRange(y){var m=S.fy||0;return {s:new Date(y,m,1),e:new Date(y+1,m,1),label:m?y+'-'+(y+1):String(y)}}
+   Always the calendar year (January-December), the self-employed tax year; "tax year start" (S.fy) is only for the VAT-exempt ceiling. Internal summary only, not accounting or tax advice. */
+function accRange(y){return {s:new Date(y,0,1),e:new Date(y+1,0,1),label:String(y)}}
 function accIn(r,s){var a=String(s||'').split('-');if(a.length<3)return false;var d=new Date(+a[0],a[1]-1,+a[2]);return d>=r.s&&d<r.e}
-function accFill(){var el=$('accY');if(!el||el.options.length)return;var now=new Date(),cur=fyRange(now).s.getFullYear(),h='';
+function accFill(){var el=$('accY');if(!el||el.options.length)return;var now=new Date(),cur=now.getFullYear(),h='';
   for(var k=Math.max(2020,cur-6);k<=cur;k++)h+='<option value="'+k+'"'+(k===cur?' selected':'')+'>'+accRange(k).label+'</option>';el.innerHTML=h}
 function accData(y){var r=accRange(y),c2=function(n){return Math.round((+n||0)*100)/100};
   var es=S.entries.filter(function(e){return accIn(r,e.date)}).sort(function(a,b){return a.date.localeCompare(b.date)}),
@@ -1879,8 +1884,8 @@ function accData(y){var r=accRange(y),c2=function(n){return Math.round((+n||0)*1
   es.forEach(function(e){T+=c100(e.amount);B+=c100(e.bl);D+=+e.days||0;var o=cli[e.cid]||(cli[e.cid]={t:0,p:0,d:0});o.t+=c100(e.amount);o.d+=+e.days||0});
   ps.forEach(function(p){P+=c100(p.amount);var o=cli[p.cid]||(cli[p.cid]={t:0,p:0,d:0});o.p+=c100(p.amount)});
   xs.forEach(function(x){X+=c100(x.amount);cat[x.cat||'אחר']=(cat[x.cat||'אחר']||0)+c100(x.amount)});
-  var title='Easy Record · '+(S.fy?'שנת מס ':'שנת ')+r.label,nm=[S.fname,S.lname].filter(Boolean).join(' ');
-  var summary=[[title],[nm?'שם: '+nm:''],['הופק ב-'+fmt(today())+' · '+(S.fy?'שנת המס מתחילה ב'+MN[S.fy]:'ינואר עד דצמבר')],[],
+  var title='Easy Record · '+'שנת '+r.label,nm=[S.fname,S.lname].filter(Boolean).join(' ');
+  var summary=[[title],[nm?'שם: '+nm:''],['הופק ב-'+fmt(today())+' · '+'ינואר עד דצמבר'],[],
     ['נושא','סכום (₪)'],
     ['הכנסות לפי תאריך העבודה',T/100],
     ['תקבולים (כסף שהתקבל בפועל לפי תאריך התשלום)',P/100],
@@ -1897,13 +1902,13 @@ function accData(y){var r=accRange(y),c2=function(n){return Math.round((+n||0)*1
   var lk=Object.keys(cli).sort(function(a,b){return cli[b].t-cli[a].t}),byCli=[['לקוח','ימי עבודה','הכנסות לפי עבודה','תקבולים']].concat(lk.map(function(k){var o=cli[k];return [cl(+k).name,c2(o.d),o.t/100,o.p/100]}));
   return {r:r,label:r.label,receipts:rc,count:es.length+ps.length+xs.length,
     sheets:[{name:'סיכום',rows:summary,widths:[6,2]},{name:'הכנסות',rows:inc,widths:[2,3,1,1,2,2,2,4]},{name:'תקבולים',rows:pay,widths:[2,3,2,2,4]},{name:'הוצאות',rows:exp,widths:[2,3,2,3,4]},{name:'הוצאות לפי קטגוריה',rows:byCat,widths:[3,2,1]},{name:'לפי לקוח',rows:byCli,widths:[3,2,2,2]}]}}
-async function accGo(){var el=$('accY'),y=+(el&&el.value)||fyRange(new Date()).s.getFullYear(),A=accData(y),btn=$('accBtn');
+async function accGo(){var el=$('accY'),y=+(el&&el.value)||new Date().getFullYear(),A=accData(y),btn=$('accBtn');
   if(!A.count&&!A.receipts.length)return info('אין נתונים בשנה הזו');if(!window.JSZip)return info('רכיב ה-ZIP עוד לא נטען. נסה שוב בעוד רגע.');
   if(btn){btn.disabled=true;btn.textContent='מכין את הקובץ...'}
   try{var list=A.receipts,miss=0;if(list.length&&typeof rcEnsureAll==='function'){miss=await rcEnsureAll(list);list=list.filter(function(f){return f.blob})}
     var z=new JSZip(),base='easy-record-'+A.label;z.file(base+'.xlsx',await xlsxBook(A.sheets));
     var seen={};list.slice().sort(function(a,b){return a.date.localeCompare(b.date)}).forEach(function(f){var k='receipts/'+safe(cl(f.cid).name)+'/'+f.date+'_'+safe(f.name);if(seen[k]){seen[k]++;k=k.replace(/(\.[^.\/]*)?$/,'_'+seen[k]+'$1')}else seen[k]=1;z.file(k,f.blob)});
-    z.file('קרא אותי.txt','﻿'+['Easy Record · '+(S.fy?'שנת מס ':'שנת ')+A.label,'',base+'.xlsx: גיליונות סיכום, הכנסות, תקבולים, הוצאות, הוצאות לפי קטגוריה ולפי לקוח.','receipts/: קבצי הקבלות של השנה, לפי לקוח.'+(miss?' ('+miss+' קבלות לא הורדו מהענן ולא נכללו.)':''),'','סיכום פנימי מתוך האפליקציה. זה לא דוח חשבונאי ולא ייעוץ מס.'].join('\r\n'));
+    z.file('קרא אותי.txt','﻿'+['Easy Record · '+'שנת '+A.label,'',base+'.xlsx: גיליונות סיכום, הכנסות, תקבולים, הוצאות, הוצאות לפי קטגוריה ולפי לקוח.','receipts/: קבצי הקבלות של השנה, לפי לקוח.'+(miss?' ('+miss+' קבלות לא הורדו מהענן ולא נכללו.)':''),'','סיכום פנימי מתוך האפליקציה. זה לא דוח חשבונאי ולא ייעוץ מס.'].join('\r\n'));
     await dl(base+'-accountant.zip',await z.generateAsync({type:'blob',compression:'DEFLATE'}));
     if(miss)info(miss+' קבלות לא הורדו מהענן ולא נכללו בקובץ. בדוק את החיבור ונסה שוב.')}
   catch(e){info('יצירת הקובץ נכשלה: '+(e&&e.message||e))}

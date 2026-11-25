@@ -1,6 +1,6 @@
 {
   "name": "easy-record",
-  "version": "5.0.0-beta.35",
+  "version": "5.0.0-beta.36",
   "private": true,
   "description": "Easy Record - work days, hours, clients and payments (PWA)",
   "scripts": {

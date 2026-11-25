@@ -4,10 +4,10 @@ function expIn(pre){return (S.expenses||[]).filter(function(x){return !pre||x.da
 function expSum(l){return l.reduce(function(s,x){return s+c100(x.amount)},0)/100}
 function incIn(pre){var s=0;S.entries.forEach(function(e){if(!pre||e.date.indexOf(pre)===0)s+=c100(e.amount)});return s/100}
 function expAdd(){var a=c100($('xA').value)/100,d=$('xD').value||today(),c=$('xC').value.replace(/\s+/g,' ').trim()||'אחר',er=$('xErr');er.textContent='';if(!(a>0)){er.textContent='הזן סכום גדול מאפס';return $('xA').focus()}
-  var x={id:uid(),date:d,amount:a,cat:c,note:$('xN').value.trim(),cid:+$('xCl').value||0},rp=$('xRep'),xv=$('xVat');if(S.vatOn&&xv&&xv.value==='0')x.nv=1;if(rp&&rp.value==='1'){x.rep=1;x.rpTo=d.slice(0,7)}S.expenses=S.expenses||[];S.expenses.push(x);expRecur();$('xA').value=$('xN').value='';if(rp){rp.value='0';try{delete DIRTY[fKey(rp)]}catch(e){}}save();render()}
+  var x={id:uid(),date:d,amount:a,cat:c,note:$('xN').value.trim(),cid:+$('xCl').value||0},rp=$('xRep'),xv=$('xVat');if(S.vatOn&&xv&&xv.value==='0')x.nv=1;if(rp&&rp.value==='1'){x.rep=1;x.rpTo=x.rp0=d.slice(0,7)}S.expenses=S.expenses||[];S.expenses.push(x);expRecur();$('xA').value=$('xN').value='';if(rp){rp.value='0';try{delete DIRTY[fKey(rp)]}catch(e){}}save();render()}
 function expDel(id){var x=(S.expenses||[]).find(function(y){return y.id===id});if(!x)return;cf('למחוק את ההוצאה ('+nis(x.amount)+', '+x.cat+')?'+(x.rep?' היא לא תתווסף יותר בחודשים הבאים (מה שכבר נוסף נשאר).':''),function(){S.expenses.splice(S.expenses.indexOf(x),1);tombAdd('x',x);save();render()})}
 function expEdit(id){var x=(S.expenses||[]).find(function(y){return y.id===id});if(!x)return;$('sheetBody').innerHTML='<b>עריכת הוצאה</b><label for="xeA">סכום (₪)</label><input id="xeA" type="number" inputmode="decimal" value="'+x.amount+'"><label for="xeD">תאריך</label><input id="xeD" type="date" value="'+x.date+'"><label for="xeC">קטגוריה</label><input id="xeC" list="xCats" value="'+qa(x.cat)+'"><label for="xeN">הערה</label><input id="xeN" value="'+qa(x.note||'')+'">'+(S.vatOn?'<label for="xeV">מע״מ בהוצאה</label><select id="xeV" style="width:100%"><option value="1">יש בה מע״מ (כלול בסכום)</option><option value="0"'+(x.nv?' selected':'')+'>בלי מע״מ</option></select>':'')+(x.rpOf?'<small class="m">נוספה אוטומטית מהוצאה קבועה.</small>':'<label for="xeR">חוזרת?</label><select id="xeR" style="width:100%"><option value="0">חד-פעמית</option><option value="1"'+(x.rep?' selected':'')+'>כל חודש</option></select>')+'<div id="xeE" class="owe"></div><button onclick="expEditGo('+id+')">שמירה</button><button class="ghost" onclick="closeS()">ביטול</button>';$('sheet').hidden=false}
-function expEditGo(id){var x=(S.expenses||[]).find(function(y){return y.id===id}),a=c100($('xeA').value)/100;if(!x)return;if(!(a>0)){$('xeE').textContent='הזן סכום גדול מאפס';return}x.amount=a;x.date=$('xeD').value||x.date;x.cat=$('xeC').value.replace(/\s+/g,' ').trim()||'אחר';x.note=$('xeN').value.trim();var xv=$('xeV');if(xv){if(xv.value==='0')x.nv=1;else delete x.nv}var r=$('xeR');if(r){if(r.value==='1'){if(!x.rep){x.rep=1;x.rpTo=x.date.slice(0,7)}}else if(x.rep){delete x.rep;delete x.rpTo}}expRecur();closeS();save();render()}
+function expEditGo(id){var x=(S.expenses||[]).find(function(y){return y.id===id}),a=c100($('xeA').value)/100;if(!x)return;if(!(a>0)){$('xeE').textContent='הזן סכום גדול מאפס';return}if(x.rep&&!/^\d{4}-\d{2}$/.test(x.rp0||'')&&/^\d{4}-\d{2}/.test(x.date||''))x.rp0=x.date.slice(0,7);x.amount=a;x.date=$('xeD').value||x.date;x.cat=$('xeC').value.replace(/\s+/g,' ').trim()||'אחר';x.note=$('xeN').value.trim();var xv=$('xeV');if(xv){if(xv.value==='0')x.nv=1;else delete x.nv}var r=$('xeR');if(r){if(r.value==='1'){if(!x.rep){x.rep=1;x.rpTo=x.rp0=x.date.slice(0,7)}}else if(x.rep){delete x.rep;delete x.rpTo;delete x.rp0}}expRecur();closeS();save();render()}
 function rExp(){if(PSUB!=='exp')return;var now=new Date(),fm=$('xFm'),fy=$('xFy');
   if(!fm.options.length){fm.innerHTML='<option value="">כל השנה</option>'+MN.map(function(n,i){return '<option value="'+String(i+1).padStart(2,'0')+'">'+n+'</option>'}).join('');fm.value=String(now.getMonth()+1).padStart(2,'0');var h='';for(var y=2020;y<=now.getFullYear()+1;y++)h+='<option>'+y+'</option>';fy.innerHTML=h;fy.value=String(now.getFullYear())}
   if(!$('xD').value)$('xD').value=today();try{$('xVatW').hidden=!S.vatOn}catch(e){}
@@ -21,13 +21,18 @@ function rExp(){if(PSUB!=='exp')return;var now=new Date(),fm=$('xFm'),fy=$('xFy'
 
 /* recurring expenses: an expense with rep:1 is the template. Each month after it (up to this month, never a future date) gets a
    copy on the same day of the month (the last day if the month is shorter). Copies have a fixed id (template id + months since
-   the template), so two devices that both add the same month end up with the same record, not two. rpTo = last month already
-   added, so a copy the user deleted is not added again. Returns true when something was added. */
-function expRecur(){if(typeof RO!=='undefined'&&RO)return false;var L=S.expenses=S.expenses||[],now=today(),cm=now.slice(0,7),ch=false;
-  L.filter(function(x){return x.rep&&/^\d{4}-\d{2}-\d{2}$/.test(x.date||'')}).forEach(function(t){var y0=+t.date.slice(0,4),m0=+t.date.slice(5,7)-1,day=+t.date.slice(8,10),
-    from=/^\d{4}-\d{2}$/.test(t.rpTo||'')&&t.rpTo>t.date.slice(0,7)?t.rpTo:t.date.slice(0,7),k0=(+from.slice(0,4)-y0)*12+(+from.slice(5,7)-1-m0);
-    for(var k=k0+1;k<=k0+60;k++){var yy=y0+Math.floor((m0+k)/12),mm=(m0+k)%12,last=new Date(yy,mm+1,0).getDate(),
-      d=yy+'-'+String(mm+1).padStart(2,'0')+'-'+String(Math.min(day,last)).padStart(2,'0');if(d>now)break;
-      var id=t.id+k;if(!L.some(function(z){return z.id===id})&&!(S.tomb&&S.tomb[kf('x',id)])){var cp={id:id,date:d,amount:t.amount,cat:t.cat,note:t.note||'',cid:t.cid||0,rpOf:t.id};if(t.nv)cp.nv=1;L.push(cp)}
-      t.rpTo=d.slice(0,7);ch=true}});
+   rp0, the template's first month), so two devices that both add the same month end up with the same record, not two. rp0 stays
+   fixed when the user later changes the template's date, so the ids of later months don't shift onto ids already used (that
+   used to skip a month). rpTo = last month already added, so a copy the user deleted is not added again. A month that already
+   has a copy of this template is never given a second one. Returns true when something was added. */
+function expRecur(){if(typeof RO!=='undefined'&&RO)return false;var L=S.expenses=S.expenses||[],now=today(),ch=false,ym=/^\d{4}-\d{2}$/;
+  var mi=function(s){return +s.slice(0,4)*12+(+s.slice(5,7)-1)};
+  L.filter(function(x){return x.rep&&/^\d{4}-\d{2}-\d{2}$/.test(x.date||'')}).forEach(function(t){var dm=t.date.slice(0,7),day=+t.date.slice(8,10);
+    if(!ym.test(t.rp0||''))t.rp0=dm;
+    var o=mi(t.rp0),from=ym.test(t.rpTo||'')&&t.rpTo>dm?t.rpTo:dm,f=mi(from),has={};
+    L.forEach(function(z){if(z.rpOf===t.id&&typeof z.date==='string')has[z.date.slice(0,7)]=1});
+    for(var n=f+1;n<=f+60;n++){var yy=Math.floor(n/12),mm=n%12,last=new Date(yy,mm+1,0).getDate(),mo=yy+'-'+String(mm+1).padStart(2,'0'),
+      d=mo+'-'+String(Math.min(day,last)).padStart(2,'0');if(d>now)break;
+      var id=t.id+(n-o);if(!has[mo]&&!L.some(function(z){return z.id===id})&&!(S.tomb&&S.tomb[kf('x',id)])){var cp={id:id,date:d,amount:t.amount,cat:t.cat,note:t.note||'',cid:t.cid||0,rpOf:t.id};if(t.nv)cp.nv=1;L.push(cp);has[mo]=1}
+      t.rpTo=mo;ch=true}});
   return ch}

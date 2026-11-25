@@ -19,6 +19,16 @@ const {chromium}=require('playwright'),path=require('path'),URL='file://'+path.j
   out.off=run('2026-06-01',[Object.assign({},tpl,{rep:undefined})]);
   out.year=run('2027-02-04',[Object.assign({},tpl,{date:'2026-11-05',rpTo:'2026-11'})]);
   RO=true;out.ro=run('2026-04-15',[tpl]);RO=false;
+  // beta.36: the user moves the template's date to a later month; no month may be skipped and none doubled
+  out.mv1=run('2026-03-20',[Object.assign({},tpl,{date:'2026-01-15',rpTo:'2026-01',rp0:'2026-01'})]);
+  const mvL=JSON.parse(JSON.stringify(S.expenses));mvL.find(x=>x.rep).date='2026-02-15';
+  out.mv2=run('2026-04-20',mvL);out.mv3=run('2026-05-20',JSON.parse(JSON.stringify(S.expenses)));
+  // an older template saved before rp0 existed, its date changed through the edit dialog
+  S.expenses=[Object.assign({},tpl,{date:'2026-01-15',rpTo:'2026-03'}),{id:1000001,date:'2026-02-15',amount:120,cat:'x',rpOf:1000000},{id:1000002,date:'2026-03-15',amount:120,cat:'x',rpOf:1000000}];
+  today=()=>'2026-03-20';expEdit(1000000);document.getElementById('xeD').value='2026-02-15';expEditGo(1000000);out.legacyRp0=S.expenses.find(x=>x.rep).rp0;
+  out.mv4=run('2026-04-20',JSON.parse(JSON.stringify(S.expenses)));
+  // a month that already has a copy (any id) does not get a second one
+  out.dupM=run('2026-02-20',[Object.assign({},tpl,{date:'2026-01-15',rpTo:'2026-01'}),{id:555,date:'2026-02-03',amount:120,cat:'x',rpOf:1000000}]);
   S.expenses=[];S.tomb={};save();return out});
  ok('הוצאה קבועה מ-31.1: נוספה לפברואר (28), מרץ (31); אפריל עוד לא הגיע (15.4)',g.a.ch&&JSON.stringify(g.a.l.filter(x=>x.rpOf).map(x=>x.date))==='["2026-02-28","2026-03-31"]',JSON.stringify(g.a.l));
  ok('אחרי הוספה: רשום עד איזה חודש נוסף',g.a.t.rpTo==='2026-03',g.a.t.rpTo);
@@ -31,6 +41,13 @@ const {chromium}=require('playwright'),path=require('path'),URL='file://'+path.j
  ok('הוצאה שאינה קבועה לא משתכפלת',!g.off.ch&&g.off.l.length===1);
  ok('מעבר שנה: דצמבר, ינואר; פברואר עוד לא',JSON.stringify(g.year.l.filter(x=>x.rpOf).map(x=>x.date))==='["2026-12-05","2027-01-05"]',JSON.stringify(g.year.l));
  ok('מצב קריאה בלבד: לא מוסיף',!g.ro.ch&&g.ro.l.length===1);
+ const mths=l=>JSON.stringify(l.filter(x=>x.rpOf).map(x=>x.date.slice(0,7)).sort());
+ ok('שינוי תאריך של הוצאה קבועה לחודש מאוחר: אפריל ומאי נוספים (לא מדלג על חודש)',mths(g.mv3.l)==='["2026-02","2026-03","2026-04","2026-05"]',JSON.stringify(g.mv3.l));
+ ok('אחרי שינוי תאריך: אין שני עותקים באותו חודש',g.mv3.l.filter(x=>x.rpOf).length===new Set(g.mv3.l.filter(x=>x.rpOf).map(x=>x.date.slice(0,7))).size,JSON.stringify(g.mv3.l));
+ ok('אחרי שינוי תאריך: המזהים לא זזים (אותו עותק בשני מכשירים)',g.mv3.l.find(x=>x.date==='2026-04-15').id===1000003&&g.mv3.l.find(x=>x.date==='2026-05-15').id===1000004,JSON.stringify(g.mv3.l.map(x=>x.id)));
+ ok('הוצאה קבועה ישנה (בלי rp0): בעריכת התאריך נשמר החודש המקורי',g.legacyRp0==='2026-01',g.legacyRp0);
+ ok('הוצאה קבועה ישנה אחרי שינוי תאריך: אפריל נוסף',g.mv4.ch&&mths(g.mv4.l)==='["2026-02","2026-03","2026-04"]',JSON.stringify(g.mv4.l));
+ ok('חודש שכבר יש בו עותק לא מקבל עוד אחד',g.dupM.l.length===2,JSON.stringify(g.dupM.l));
  // ---- recurring expenses: through the screen
  const ds=await p.evaluate(()=>{const d=new Date();d.setMonth(d.getMonth()-2);return ds(d)});
  await p.evaluate(()=>{tab='pay';render();pSub('exp')});
@@ -88,5 +105,10 @@ const {chromium}=require('playwright'),path=require('path'),URL='file://'+path.j
  ok('מסך 360px: אין גלילה אופקית בדשבורד',await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
  const en=await p.evaluate(async()=>{S.lang='en';save();render();await new Promise(r=>setTimeout(r,300));const t=document.getElementById('taxPaidBtn').textContent;S.lang='he';save();render();return t});
  ok('באנגלית: הכפתור מתורגם',en==='Record an advance payment',en);
+ // ---- beta.36: the yearly export for the accountant is by calendar year too
+ const ac=await p.evaluate(()=>{S.fy=6;const r=accRange(2026),y=new Date().getFullYear();S.entries.push({id:950,cid:1,date:y+'-02-01',days:1,rate:500,amount:500,receipt:false,note:''},{id:951,cid:1,date:y+'-08-01',days:1,rate:300,amount:300,receipt:false,note:''},{id:952,cid:1,date:(y+1)+'-02-01',days:1,rate:900,amount:900,receipt:false,note:''});
+  const d=accData(y),j=JSON.stringify(d);S.fy=0;S.entries=S.entries.filter(e=>e.id<950);save();return {s:r.s.getMonth(),e:r.e.getMonth(),ey:r.e.getFullYear(),label:r.label,has500:j.indexOf('500')>=0,has900:j.indexOf('900')>=0,fy:j.indexOf('שנת המס מתחילה')>=0}});
+ ok('ייצוא לרו״ח: ינואר–דצמבר גם כשתחילת שנת המס היא יולי',ac.s===0&&ac.e===0&&ac.ey===2027&&ac.label==='2026',JSON.stringify(ac));
+ ok('ייצוא לרו״ח: כולל פברואר של השנה, לא כולל פברואר של השנה הבאה',ac.has500&&!ac.has900&&!ac.fy,JSON.stringify(ac));
  ok('אין שגיאות JavaScript',!errs.length,errs.join('|'));
  let f=0;R.forEach(x=>{console.log((x[1]?'PASS ':'FAIL ')+x[0]+(x[1]?'':'  -> '+x[2]));if(!x[1])f++});console.log((R.length-f)+'/'+R.length+' passed');await b.close();process.exit(f?1:0)})();
