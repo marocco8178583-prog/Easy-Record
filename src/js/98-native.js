@@ -10,7 +10,8 @@ function natRedirect(){return isNative()?NAT_SCHEME:location.origin+location.pat
 async function natSchedule(){var LN=natPlug('LocalNotifications');if(!isNative()||!LN)return 0;try{var p=await LN.checkPermissions();if(p.display!=='granted'){p=await LN.requestPermissions();if(p.display!=='granted')return 0}
     var pend=await LN.getPending();if(pend&&pend.notifications&&pend.notifications.length)await LN.cancel({notifications:pend.notifications.map(function(n){return {id:n.id}})});
     var now=Date.now(),list=(S.tasks||[]).filter(function(t){return !t.done&&t.due&&t.time}).map(function(t){var a=t.due.split('-'),h=t.time.split(':');return {t:t,at:new Date(+a[0],+a[1]-1,+a[2],+h[0],+h[1]).getTime()}}).filter(function(x){return x.at>now}).slice(0,60);
-    if(!list.length)return 0;await LN.schedule({notifications:list.map(function(x){return {id:(x.t.id%2147483000)||1,title:'Easy Record',body:x.t.title,schedule:{at:new Date(x.at),allowWhileIdle:true}}})});return list.length}catch(e){return 0}}
+    var ns=list.map(function(x){return {id:(x.t.id%2147480000)||1,title:'Easy Record',body:x.t.title,schedule:{at:new Date(x.at),allowWhileIdle:true}}}).concat(typeof ddNat==='function'?ddNat():[]);
+    if(!ns.length)return 0;await LN.schedule({notifications:ns});return ns.length}catch(e){return 0}}
 function natHaptic(){var H=natPlug('Haptics');if(isNative()&&H)try{H.impact({style:'LIGHT'})}catch(e){}}
 (function(){if(!isNative())return;document.documentElement.setAttribute('data-native','1');
   var SB=natPlug('StatusBar');if(SB)try{SB.setBackgroundColor({color:'#12302d'});SB.setStyle({style:'DARK'})}catch(e){}

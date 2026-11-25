@@ -105,6 +105,10 @@ const api=http.createServer(async(q,s)=>{s.setHeader('Access-Control-Allow-Origi
  await until(()=>D1.evaluate(async i=>{await rcSync();return R.some(x=>x.id===i)},rid));
  ok('D1 מקבל את הקבלה ברשימה בלי להוריד את הקובץ (הורדה עצלה)',await D1.evaluate(i=>{const r=R.find(x=>x.id===i);return !!r&&r.blob===null&&r.up===1&&r.name==='kabala.pdf'},rid));
  ok('פתיחת הקבלה ב-D1 מורידה את הקובץ המקורי עם הטוקן של המשתמש',await D1.evaluate(async i=>{await vr(i);const r=R.find(x=>x.id===i);return !!r.blob&&(await r.blob.text())==='%PDF-1.4 easy record test file'},rid));
+ // beta.37: a receipt attached to an expense keeps the link on the other device
+ const xrid=await D2.evaluate(async()=>{(S.expenses=S.expenses||[]).push({id:7701,date:'2026-03-10',amount:50,cat:'ציוד',note:'',cid:0});UP={eid:0,cid:0,xid:7701};const dt=new DataTransfer();dt.items.add(new File(['%PDF-1.4 x'],'exp.pdf',{type:'application/pdf'}));$('rf').files=dt.files;await $('rf').onchange();await rcSync();return R[R.length-1].id});
+ await until(()=>D1.evaluate(async i=>{await rcSync();return R.some(x=>x.id===i)},xrid));
+ ok('קבלה של הוצאה: הקישור להוצאה ותאריך ההוצאה מגיעים למכשיר השני',await D1.evaluate(i=>{const r=R.find(x=>x.id===i);return !!r&&r.xid===7701&&r.date==='2026-03-10'},xrid),[...rowsDB.values()].filter(r=>r.id==='r'+xrid).map(r=>JSON.stringify(r.data)).join());
  await D1.evaluate(()=>closeS());
  ok('גיבוי ZIP ב-D1 כולל את קובץ הקבלה',await D1.evaluate(async i=>{const b=await zipBlob();const z=await JSZip.loadAsync(b);const f=Object.keys(z.files).find(n=>n.startsWith('receipts/'+i));return !!f&&(await z.file(f).async('string'))==='%PDF-1.4 easy record test file'},rid));
  const tid=await addFile(D2,'notes.txt','text/plain','hello');

@@ -19,7 +19,7 @@ async function rcSync(){if(!rcOn()||RCS.busy)return;if(navigator.onLine===false)
     for(var i=0;i<up.length;i++){var r=up[i];
       if(r.blob.size>RC_MAX||RC_TYPES.indexOf(rcBase(r.type))<0){r.nosync=1;await rcPut(r);changed=true;continue}
       await SBDB.req('POST','/storage/v1/object/receipts/'+uid+'/'+r.id,r.blob,{'Content-Type':rcBase(r.type),'x-upsert':'true'});
-      await SBDB.req('POST','/rest/v1/records?on_conflict=user_id,id',{user_id:uid,id:'r'+r.id,type:'receipt',ver:1,deleted:false,data:{id:r.id,cid:r.cid,eid:r.eid||0,name:r.name,type:rcBase(r.type),date:r.date,size:r.blob.size,kind:r.kind||'',dur:r.dur||0},device_id:devId()},{Prefer:'resolution=ignore-duplicates,return=minimal'});
+      await SBDB.req('POST','/rest/v1/records?on_conflict=user_id,id',{user_id:uid,id:'r'+r.id,type:'receipt',ver:1,deleted:false,data:{id:r.id,cid:r.cid,eid:r.eid||0,xid:r.xid||0,name:r.name,type:rcBase(r.type),date:r.date,size:r.blob.size,kind:r.kind||'',dur:r.dur||0},device_id:devId()},{Prefer:'resolution=ignore-duplicates,return=minimal'});
       r.up=1;await rcPut(r);changed=true}
     /* 2. deletions */
     var q=rcDelQ();
@@ -31,7 +31,7 @@ async function rcSync(){if(!rcOn()||RCS.busy)return;if(navigator.onLine===false)
     var res=await SBDB.req('GET','/rest/v1/records?select=id,data,deleted,updated_at&type=eq.receipt'+(RCS.since?'&updated_at=gte.'+encodeURIComponent(RCS.since):'')+'&order=updated_at.asc&limit=1000'),rows=await res.json(),pend=rcDelQ();
     for(var j=0;j<rows.length;j++){var row=rows[j],d=row.data||{},rid=+String(row.id).slice(1),loc=R.find(function(x){return x.id===rid});
       if(row.deleted){if(loc){await tx('readwrite',function(s){return s.delete(rid)});R=R.filter(function(x){return x.id!==rid});changed=true}}
-      else if(!loc&&pend.indexOf(rid)<0&&d.id){var nr={id:rid,cid:d.cid,eid:d.eid||0,name:d.name||'receipt',type:d.type||'',date:d.date||today(),size:d.size||0,blob:null,up:1};if(d.kind)nr.kind=d.kind;if(d.dur)nr.dur=d.dur;await rcPut(nr);R.push(nr);changed=true}
+      else if(!loc&&pend.indexOf(rid)<0&&d.id){var nr={id:rid,cid:d.cid,eid:d.eid||0,name:d.name||'receipt',type:d.type||'',date:d.date||today(),size:d.size||0,blob:null,up:1};if(d.kind)nr.kind=d.kind;if(d.xid)nr.xid=d.xid;if(d.dur)nr.dur=d.dur;await rcPut(nr);R.push(nr);changed=true}
       else if(loc&&!loc.up){loc.up=1;await rcPut(loc)}}
     if(rows.length)RCS.since=rows[rows.length-1].updated_at;
     RCS.err='';RCS.setup=true;RCS.last=Date.now()}

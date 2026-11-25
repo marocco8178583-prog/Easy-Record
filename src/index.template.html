@@ -55,6 +55,7 @@
 <div class="banner" id="roBan" hidden>👁 מצב צפייה בלבד. אפשר לראות את הנתונים אבל לא לשנות אותם.</div>
 <div class="banner" id="ckb" hidden role="button" tabindex="0" style="cursor:pointer;background:var(--okbg);color:var(--ok)" onclick="tab='clock';render()"></div>
 <div class="banner" id="rmb" hidden role="status"></div>
+<div class="banner" id="ddb" hidden role="status"></div>
 <div class="banner" id="cfb" hidden role="button" tabindex="0" style="cursor:pointer" onclick="showConf()"></div>
 <section id="v-pay">
   <h1>שכר</h1>
@@ -105,6 +106,8 @@
       <div id="xErr" class="owe" role="alert"></div>
       <button class="full" onclick="expAdd()">הוספת הוצאה</button>
     </div>
+    <h2>נסיעות עסקיות</h2>
+    <div class="card" id="tripCard"><small class="m" id="tripSum"></small><button class="ghost full" id="tripBtn" onclick="tripSheet()" style="margin-top:8px">רישום נסיעה (ק״מ)</button></div>
     <h2>ההוצאות שלי</h2>
     <div class="two"><select id="xFm" onchange="render()" aria-label="חודש"></select><select id="xFy" onchange="render()" aria-label="שנה"></select></div>
     <div id="expSum" class="card" style="margin-top:10px"></div>
@@ -242,7 +245,11 @@
     <div id="svatW" hidden><label for="svatR">שיעור מע״מ (%)</label><input id="svatR" type="number" min="0" max="50" step="0.5" inputmode="decimal">
       <label for="svatI">הסכומים בימי העבודה</label><select id="svatI" style="width:100%"><option value="exc">לפני מע״מ</option><option value="inc">כוללים מע״מ</option></select>
       <label for="svatP">דיווח למע״מ</label><select id="svatP" style="width:100%"><option value="2">כל חודשיים</option><option value="1">כל חודש</option></select></div>
-    <label for="spn">פנסיה וקרן השתלמות (בדשבורד)</label><select id="spn" style="width:100%"><option value="on">פעיל</option><option value="off">כבוי</option></select></div>
+    <label for="spn">פנסיה וקרן השתלמות (בדשבורד)</label><select id="spn" style="width:100%"><option value="on">פעיל</option><option value="off">כבוי</option></select>
+    <label for="sdd">תזכורת לפני ה-15 בחודש (מע״מ ומקדמות)</label><select id="sdd" style="width:100%"><option value="off">כבויה</option><option value="on">פעילה</option></select>
+    <div id="sddW" hidden><label for="sddA">מקדמות מס הכנסה / ביטוח לאומי</label><select id="sddA" style="width:100%"><option value="0">אין לי מקדמות</option><option value="1">כל חודש</option><option value="2">כל חודשיים</option></select>
+      <label for="sddD">כמה זמן לפני</label><select id="sddD" style="width:100%"><option value="1">יום אחד</option><option value="2">יומיים</option><option value="3">3 ימים</option><option value="5">5 ימים</option><option value="7">שבוע</option></select>
+      <small class="m">התזכורת מופיעה בראש המסך כשהאפליקציה פתוחה, ובהתראה אם אישרת התראות. מע״מ נכלל רק כשמע״מ פעיל.</small></div></div>
   <div class="card"><b>מראה האפליקציה</b>
     <div class="tabs" id="thm" style="flex-wrap:wrap"><button data-th="sys" style="flex:1 1 45%">🌗 לפי המכשיר</button><button data-th="light" style="flex:1 1 45%">☀️ יום (לייט)</button><button data-th="dark" style="flex:1 1 45%">🌙 לילה (דארק)</button><button data-th="time" style="flex:1 1 45%">🕐 אוטומטי לפי שעה</button></div>
     <p class="m" id="thn"></p></div>

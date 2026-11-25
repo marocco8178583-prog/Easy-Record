@@ -17,7 +17,7 @@ function expV3(){return {app:'easy-record',version:3,schema:3,appVersion:APP_VER
 function expObj(){return expV3()}
 async function zipBlob(){if(!window.JSZip)throw new Error('רכיב ה-ZIP עוד לא נטען. נסה שוב בעוד רגע');
   var miss=await rcEnsureAll(R);if(miss)throw new Error(miss+' קבלות נמצאות רק בענן ולא ניתן להוריד אותן כרגע. התחבר לאינטרנט ונסה שוב כדי שהגיבוי יהיה מלא');
-  var z=new JSZip(),idx=[],o=expV3();R.forEach(function(r){var fn='receipts/'+r.id+'_'+safe(r.name);z.file(fn,r.blob);idx.push({id:r.id,cid:r.cid,eid:r.eid,name:r.name,type:r.type,date:r.date,file:fn,size:r.blob.size})});
+  var z=new JSZip(),idx=[],o=expV3();R.forEach(function(r){var fn='receipts/'+r.id+'_'+safe(r.name);z.file(fn,r.blob);idx.push({id:r.id,cid:r.cid,eid:r.eid,xid:r.xid||0,name:r.name,type:r.type,date:r.date,file:fn,size:r.blob.size})});
   o.receipts=idx;o.counts.receipts=idx.length;z.file('data.json',JSON.stringify(o,null,1));
   z.file('README.txt','Easy Record backup (schema 3, app '+APP_VER+')\r\ndata.json: clients, work days, payments, settings, receipts index\r\nreceipts/: receipt and image files\r\nNo passwords or tokens are stored in this file.\r\nImport via Settings > Backup > Import.\r\n');
   return z.generateAsync({type:'blob',compression:'DEFLATE'})}
@@ -51,7 +51,7 @@ function replaceWith(n){n.debts=n.debts||[];n.expenses=n.expenses||[];n.projects
 async function restoreReceipts(n,zip,mode,added){var st={add:0,same:0,missing:0,keptLocal:0};if(!zip)return st;var list=n.receipts||[];if(!DB){st.missing=list.length;return st}
   var have={},inb={};R.forEach(function(r){have[r.id]=1});
   for(var i=0;i<list.length;i++){var x=list[i];inb[x.id]=1;if(have[x.id]){st.same++;continue}var fe=zip.file(x.file);if(!fe){st.missing++;continue}
-    var raw=await fe.async('blob'),rec={id:x.id,cid:x.cid,eid:(n.idmap&&n.idmap[x.eid])||x.eid,name:x.name,type:x.type,date:x.date,blob:new Blob([raw],{type:x.type||'application/octet-stream'})};
+    var raw=await fe.async('blob'),rec={id:x.id,cid:x.cid,eid:(n.idmap&&n.idmap[x.eid])||x.eid,name:x.name,type:x.type,date:x.date,blob:new Blob([raw],{type:x.type||'application/octet-stream'})};if(x.xid)rec.xid=x.xid;
     await tx('readwrite',function(s){return s.put(rec)});R.push(rec);if(added)added.push(rec.id);st.add++}
   R.forEach(function(r){if(!inb[r.id])st.keptLocal++});return st}
 function integrity(){var out=[],ids={};S.entries.forEach(function(e){ids[e.id]=1});S.pays.forEach(function(p){(p.alloc||[]).forEach(function(a){if(!ids[a.eid])out.push('תשלום '+p.id+' מפנה ליום עבודה חסר')});var s=(p.alloc||[]).reduce(function(x,a){return x+a.amt},0);if(Math.abs(s-p.amount)>0.01)out.push('תשלום '+p.id+' לא מאוזן')});
