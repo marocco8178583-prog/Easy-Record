@@ -39,9 +39,10 @@ function ddItems(d,withAmt){var l=[],m=d.getMonth();
   if(S.vatOn&&(vatPer()===1||m%2===0)){var p=vatRange(d,1),it={k:'vat',t:'דיווח ותשלום מע״מ ('+vatLabel(p)+')'};if(withAmt){var v=vatInfo(p);it.a=v.due}l.push(it)}
   var a=+S.ddAdv;if(a===1||(a===2&&m%2===0))l.push({k:'adv',t:'מקדמות מס הכנסה וביטוח לאומי'});return l}
 function ddKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')}
-function ddDone(){try{localStorage.setItem('er-dd-done',ddKey(new Date()))}catch(e){}var b=$('ddb');if(b)b.hidden=true}
+function ddDone(){try{localStorage.setItem('er-dd-done',ddKey(new Date()))}catch(e){}var b=$('ddb');if(b)b.hidden=true;try{if(typeof natSchedule==='function')natSchedule()}catch(e){}}
+function ddDoneKey(){try{return localStorage.getItem('er-dd-done')||''}catch(e){return ''}}
 /* {due, left (days), items} when today is inside the reminder window and it was not dismissed; otherwise null */
-function ddNow(now){now=now||new Date();if(!S.ddOn)return null;var y=now.getFullYear(),m=now.getMonth(),due=new Date(y,m,15),t0=new Date(y,m,now.getDate()),
+function ddNow(now){now=now||new Date();if(!S.ddOn)return null;var y=now.getFullYear(),m=now.getMonth(),due=due15(y,m),t0=new Date(y,m,now.getDate()),
   left=Math.round((due-t0)/864e5);if(left<0||left>ddDays())return null;
   try{if(localStorage.getItem('er-dd-done')===ddKey(now))return null}catch(e){}
   var l=ddItems(now,true);return l.length?{due:due,left:left,items:l}:null}
@@ -50,13 +51,13 @@ function ddCheck(){var b=$('ddb');if(!b)return;var s=ddNow();if(!s){b.hidden=tru
   b.hidden=false;b.innerHTML='📅 '+esc(ddText(s))+' · <u onclick="event.stopPropagation();ddDone()">סימנתי שטיפלתי</u>';b.onclick=function(){tab='dash';render();window.scrollTo(0,0)};
   try{if(window.Notification&&Notification.permission==='granted'&&localStorage.getItem('er-dd-notif')!==today()){localStorage.setItem('er-dd-notif',today());new Notification('Easy Record',{body:ddText(s),tag:'er-dd'})}}catch(e){}}
 /* for the phone app: OS notifications at 09:00, "days before" the 15th, for the next 4 months */
-function ddNat(){if(!S.ddOn)return [];var now=new Date(),out=[];for(var k=0;k<4;k++){var d=new Date(now.getFullYear(),now.getMonth()+k,1),l=ddItems(d,false),at=new Date(d.getFullYear(),d.getMonth(),15-ddDays(),9,0);
-    if(l.length&&at>now)out.push({id:2147480000+(d.getFullYear()*12+d.getMonth())%1000,title:'Easy Record',body:'עד 15.'+(d.getMonth()+1)+': '+l.map(function(x){return x.t}).join('; '),schedule:{at:at,allowWhileIdle:true}})}
+function ddNat(){if(!S.ddOn)return [];var now=new Date(),out=[];for(var k=0;k<4;k++){var d=new Date(now.getFullYear(),now.getMonth()+k,1),l=ddItems(d,false),du=due15(d.getFullYear(),d.getMonth()),at=new Date(du.getFullYear(),du.getMonth(),du.getDate()-ddDays(),9,0);
+    if(l.length&&at>now&&ddKey(d)!==ddDoneKey())out.push({id:2147480000+(d.getFullYear()*12+d.getMonth())%1000,title:'Easy Record',body:'עד '+du.getDate()+'.'+(du.getMonth()+1)+': '+l.map(function(x){return x.t}).join('; '),schedule:{at:at,allowWhileIdle:true}})}
   return out}
 setInterval(function(){try{ddCheck()}catch(e){}},60000);document.addEventListener('visibilitychange',function(){if(!document.hidden)try{ddCheck()}catch(e){}});
 
 /* ---------- settings ---------- */
-function ddSetVals(){var s=$('sdd');if(!s)return;s.value=S.ddOn?'on':'off';$('sddW').hidden=!S.ddOn;$('sddA').value=String([0,1,2].indexOf(+S.ddAdv)>=0?+S.ddAdv:0);$('sddD').value=String(ddDays())}
+function ddSetVals(){try{if(typeof plSetVals==='function')plSetVals()}catch(e){}var s=$('sdd');if(!s)return;s.value=S.ddOn?'on':'off';$('sddW').hidden=!S.ddOn;$('sddA').value=String([0,1,2].indexOf(+S.ddAdv)>=0?+S.ddAdv:0);$('sddD').value=String(ddDays())}
 try{$('sdd').onchange=function(){S.ddOn=this.value==='on';save();if(S.ddOn&&window.Notification&&Notification.permission==='default'){try{Notification.requestPermission()}catch(e){}}ddSetVals();render()};
   $('sddA').onchange=function(){S.ddAdv=+this.value===1?1:+this.value===2?2:0;save();render()};
   $('sddD').onchange=function(){S.ddDays=[1,2,3,5,7].indexOf(+this.value)>=0?+this.value:2;save();render()}}catch(e){}

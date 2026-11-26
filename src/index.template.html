@@ -108,6 +108,8 @@
     </div>
     <h2>נסיעות עסקיות</h2>
     <div class="card" id="tripCard"><small class="m" id="tripSum"></small><button class="ghost full" id="tripBtn" onclick="tripSheet()" style="margin-top:8px">רישום נסיעה (ק״מ)</button></div>
+    <h2>ייבוא מהבנק או מכרטיס האשראי</h2>
+    <div class="card" id="impCard"><small class="m">קובץ CSV או Excel (xlsx) שהורדת מהבנק או מחברת האשראי. בוחרים אילו שורות הן הוצאות של העסק, והן נוספות לרשימה.</small><button class="ghost full" id="impBtn" onclick="impPick()" style="margin-top:8px">ייבוא הוצאות מקובץ</button><input type="file" id="impF" accept=".csv,.txt,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden aria-label="קובץ הוצאות"></div>
     <h2>ההוצאות שלי</h2>
     <div class="two"><select id="xFm" onchange="render()" aria-label="חודש"></select><select id="xFy" onchange="render()" aria-label="שנה"></select></div>
     <div id="expSum" class="card" style="margin-top:10px"></div>
@@ -249,7 +251,8 @@
     <label for="sdd">תזכורת לפני ה-15 בחודש (מע״מ ומקדמות)</label><select id="sdd" style="width:100%"><option value="off">כבויה</option><option value="on">פעילה</option></select>
     <div id="sddW" hidden><label for="sddA">מקדמות מס הכנסה / ביטוח לאומי</label><select id="sddA" style="width:100%"><option value="0">אין לי מקדמות</option><option value="1">כל חודש</option><option value="2">כל חודשיים</option></select>
       <label for="sddD">כמה זמן לפני</label><select id="sddD" style="width:100%"><option value="1">יום אחד</option><option value="2">יומיים</option><option value="3">3 ימים</option><option value="5">5 ימים</option><option value="7">שבוע</option></select>
-      <small class="m">התזכורת מופיעה בראש המסך כשהאפליקציה פתוחה, ובהתראה אם אישרת התראות. מע״מ נכלל רק כשמע״מ פעיל.</small></div></div>
+      <small class="m">התזכורת מופיעה בראש המסך כשהאפליקציה פתוחה, ובהתראה אם אישרת התראות. מע״מ נכלל רק כשמע״מ פעיל.</small><small class="m" style="display:block">כשה-15 נופל בשבת או בחג, המועד עובר ליום שאחריו.</small></div>
+    <label for="sgoal">יעד הכנסה חודשי (₪)</label><input id="sgoal" type="number" min="0" step="100" inputmode="decimal" placeholder="ריק = בלי יעד"><small class="m">כשיש יעד, בדשבורד מופיע כמה כבר הרווחת החודש וכמה נשאר.</small></div>
   <div class="card"><b>מראה האפליקציה</b>
     <div class="tabs" id="thm" style="flex-wrap:wrap"><button data-th="sys" style="flex:1 1 45%">🌗 לפי המכשיר</button><button data-th="light" style="flex:1 1 45%">☀️ יום (לייט)</button><button data-th="dark" style="flex:1 1 45%">🌙 לילה (דארק)</button><button data-th="time" style="flex:1 1 45%">🕐 אוטומטי לפי שעה</button></div>
     <p class="m" id="thn"></p></div>

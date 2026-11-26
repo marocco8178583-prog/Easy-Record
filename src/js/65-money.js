@@ -16,11 +16,17 @@ function vatLabel(r){var a=MN[r.s.getMonth()],b=MN[new Date(r.e.getFullYear(),r.
 function vatSplitInc(a){var r=vatR();a=+a||0;return S.vatInc==='inc'?{net:a/(1+r),vat:a-a/(1+r)}:{net:a,vat:a*r}}
 /* an expense: amount always includes VAT, unless marked nv (no VAT on it, e.g. insurance, food abroad) */
 function vatSplitExp(x){var r=vatR(),a=+x.amount||0;return x.nv?{net:a,vat:0}:{net:a/(1+r),vat:a-a/(1+r)}}
+/* Israeli rest days (yom tov) by the Hebrew calendar: Rosh Hashana, Yom Kippur, Sukkot, Simchat Torah, Pesach (first and last day), Shavuot, Independence Day (with its moves) */
+function hHol(d){try{var p=new Intl.DateTimeFormat('en-u-ca-hebrew',{month:'long',day:'numeric'}).formatToParts(d),mo='',n=0,w=d.getDay();p.forEach(function(x){if(x.type==='month')mo=x.value;if(x.type==='day')n=parseInt(x.value,10)});
+  if(/^Tishri/.test(mo))return [1,2,10,15,22].indexOf(n)>=0;if(/^Nisan/.test(mo))return n===15||n===21;if(/^Sivan/.test(mo))return n===6;
+  if(/^Iyar/.test(mo))return (n===5&&w!==1&&w!==5&&w!==6)||(n===4&&w===4)||(n===3&&w===4)||(n===6&&w===2);return false}catch(e){return false}}
+/* the reporting / payment deadline of month m: the 15th, or the next day that is not Saturday or a holiday (a deadline on a rest day moves to the next day) */
+function due15(y,m){var d=new Date(y,m,15);for(var i=0;i<7&&(d.getDay()===6||hHol(d));i++)d=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1);return d}
 function vatInfo(r){var now=new Date(),td=today(),inc=0,exp=0,out=0,inp=0;
   function inR(s){if(!s||s>td)return false;var a=s.split('-'),dt=new Date(+a[0],a[1]-1,+a[2]);return dt>=r.s&&dt<r.e}
   (S.cb==='paid'?S.pays:S.entries).forEach(function(e){if(inR(e.date)){inc+=+e.amount||0;out+=vatSplitInc(e.amount).vat}});
   (S.expenses||[]).forEach(function(x){if(inR(x.date)){exp+=+x.amount||0;inp+=vatSplitExp(x).vat}});
-  out=Math.round(out*100)/100;inp=Math.round(inp*100)/100;return {r:r,inc:inc,exp:exp,out:out,inp:inp,due:Math.round((out-inp)*100)/100,deadline:new Date(r.e.getFullYear(),r.e.getMonth(),15),open:now<r.e}}
+  out=Math.round(out*100)/100;inp=Math.round(inp*100)/100;return {r:r,inc:inc,exp:exp,out:out,inp:inp,due:Math.round((out-inp)*100)/100,deadline:due15(r.e.getFullYear(),r.e.getMonth()),open:now<r.e}}
 function vatCard(){if(!S.vatOn)return '';var cur=vatInfo(vatRange(new Date())),prev=vatInfo(vatRange(new Date(),1));
   var row=function(l,v,cls){return '<div class="top" style="margin:4px 0"><small class="m">'+l+'</small><b'+(cls?' class="'+cls+'"':'')+'>'+nis(v)+'</b></div>'};
   var blk=function(v,title){return '<small class="m"><b>'+title+'</b> · '+vatLabel(v.r)+'</small>'+row('מע״מ על ההכנסות (עסקאות)',v.out)+row('מע״מ על ההוצאות (תשומות)',v.inp)+
