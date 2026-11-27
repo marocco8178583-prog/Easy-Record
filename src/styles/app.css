@@ -203,9 +203,11 @@ html[data-nav] #toast{bottom:calc(20px + env(safe-area-inset-bottom,0px))}
 
 /* beta.40: expense categories */
 .xcGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:8px 0}
-button.xcChip{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;padding:8px 2px;min-height:0;background:transparent;border:1px solid var(--line);border-radius:12px;color:var(--ink);font-size:11px;font-weight:500;line-height:1.2;min-width:0}
+button.xcChip{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;padding:8px 2px;min-height:0;background:var(--bg);border:1px solid color-mix(in srgb,var(--ink) 55%,var(--card));border-radius:12px;color:var(--ink);font-size:11px;font-weight:500;line-height:1.2;min-width:0}
 button.xcChip span:last-child{max-width:100%;overflow-wrap:anywhere;text-align:center}
-button.xcChip.on{border:2px solid var(--brand);padding:7px 1px;background:color-mix(in srgb,var(--brand) 10%,transparent);font-weight:700}
+button.xcChip.on{border:2px solid var(--ink);padding:7px 1px;background:color-mix(in srgb,var(--ink) 12%,var(--card));font-weight:700}
+html[data-hc] button.xcChip{border:2px solid var(--ink)!important}
+.about p{margin:8px 0;line-height:1.65}.about ul{margin:6px 0;padding-inline-start:20px;line-height:1.65}
 .xcI{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;color:#fff;flex:none}
 .xcI svg{width:17px;height:17px}
 .xcI.xcIn{width:22px;height:22px;vertical-align:-6px;margin-inline-end:6px}.xcI.xcIn svg{width:13px;height:13px}
