@@ -50,7 +50,7 @@ const {chromium}=require('playwright'),path=require('path'),URL='file://'+path.j
  ok('שורה שכבר רשומה (2.11, 80 ₪) מסומנת "כבר רשום"',JSON.stringify(r.dup)==='[false,true,false,false]',JSON.stringify(r.dup));
  await p.evaluate(()=>impAll(1));
  r=await p.evaluate(()=>({n:impSel().length,btn:$('imGo').textContent}));
- ok('"בחירת הכל" לא בוחר שורות שכבר רשומות',r.n===3&&/הוספת 3 הוצאות/.test(r.btn),JSON.stringify(r));
+ ok('"בחירת הכל" לא בוחר שורות שכבר רשומות (ומ-beta.39 גם לא את הזיכוי)',r.n===2&&/הוספת 2 הוצאות/.test(r.btn),JSON.stringify(r));
  await p.evaluate(()=>{impAll(0);document.querySelector('#imL input[data-i="0"]').click()});
  await p.fill('#imC','דלק ונסיעות');await p.evaluate(()=>impSave());
  r=await p.evaluate(()=>{const x=S.expenses.find(z=>z.note==='פז דלק');return {n:S.expenses.length,x:x&&{d:x.date,a:x.amount,c:x.cat,cid:x.cid,ver:x.ver>0},closed:$('sheet').hidden}});

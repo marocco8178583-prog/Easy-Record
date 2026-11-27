@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Easy Record · יומן שכר</title>
-<link rel="icon" type="image/png" href="icons/favicon-48.png?v=5.0.0-beta.38">
+<link rel="icon" type="image/png" href="icons/favicon-48.png?v=5.0.0-beta.39">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Easy Record">
 <meta name="theme-color" content="#12302d">
 <script src="config.js" onerror="void 0"></script>
-<link rel="manifest" href="manifest.webmanifest?v=5.0.0-beta.38">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=5.0.0-beta.38">
+<link rel="manifest" href="manifest.webmanifest?v=5.0.0-beta.39">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=5.0.0-beta.39">
 <script>
 /*!
 
@@ -68,6 +68,7 @@ summary{cursor:pointer;list-style:none}summary::-webkit-details-marker{display:n
 #cgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}#cgrid i{font-style:normal;font-size:13px;color:var(--mute)}
 .d{position:relative;padding:9px 0;background:transparent;color:var(--ink);border-radius:10px;font-weight:500}
 .d.td{border:1px solid var(--ink)}.d.sel{background:var(--brand);color:var(--onbrand)}
+.d .offm{position:absolute;top:1px;left:0;right:0;font-size:9px;font-weight:700;line-height:1;pointer-events:none}.d .off-res{color:var(--brand)}.d .off-sick{color:var(--owe)}.d .off-vac{color:var(--ok)}.d.sel .offm{color:var(--onbrand)}
 .d u{position:absolute;bottom:3px;left:50%;margin-left:-3px;width:6px;height:6px;border-radius:50%}.d u.u{background:var(--owe)}.d u.p{background:var(--ok)}
 #cinfo{font-size:14px;color:var(--mute);margin:8px 0}
 #sheet{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:10;display:flex;align-items:flex-end}
@@ -384,6 +385,7 @@ html[data-nav] #toast{bottom:calc(20px + env(safe-area-inset-bottom,0px))}
   <div class="chead" id="chead"></div>
   <div id="cgrid"></div>
   <div id="cinfo"></div>
+  <div class="card" id="offBox"></div>
   <div class="card">
     <label for="client">אצל מי עבדת ביום הזה?</label>
     <input id="client" list="clients" placeholder="שם הלקוח" autocomplete="off"><datalist id="clients"></datalist>
@@ -513,7 +515,7 @@ html[data-nav] #toast{bottom:calc(20px + env(safe-area-inset-bottom,0px))}
 </nav>
 <script>
 /* ===== module: 00-core.js ===== */
-var APP_VER='5.0.0-beta.38',KEY='er4-v3',LEGACY_KEY='workdays-v1',SCHEMA=3,NOSAVE=false,MIGERR='',S=null,tab='clock',filt='unpaid',OP={},selD,cal;
+var APP_VER='5.0.0-beta.39',KEY='er4-v3',LEGACY_KEY='workdays-v1',SCHEMA=3,NOSAVE=false,MIGERR='',S=null,tab='clock',filt='unpaid',OP={},selD,cal;
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S||!S.entries){try{S=JSON.parse(localStorage.getItem(LEGACY_KEY))}catch(e){S=null}}
 if(!S||!S.entries)S={rate:600,entries:[],clients:[]};
@@ -538,7 +540,7 @@ function eh(e){return e.nh!=null?e.nh:hrs(e.t1,e.t2)}
 function hf(h){var H=Math.floor(h),M=Math.round((h-H)*60);if(M===60){H++;M=0}return H+':'+String(M).padStart(2,'0')}
 function safe(t){return String(t).replace(/[\\\/:*?"<>|]+/g,'_').trim()||'file'}
 /* ===== data model v3: work days + payments + record metadata ===== */
-var META={cr:1,up:1,ver:1,bv:1,_h:1},SETK=['rate','hrate','od','cap','capOn','fy','cb','accent','tgt','dcc','lang','fs','rmOn','rmT','bg','bgDim','bgSec','bgTone','bgBlur','bgGlass','bgFav','cur','otOn','otAfter','otM1','otAfter2','otM2','payUrl','payName','hc','tpls','snd','sndKind','tts','mute','qhOn','qh1','qh2','brkMax','runMax','brPaid','nick','tap','fname','lname','dob','shOn','shM','shF','shT','sndMode','sndVol','txOn','txPts','navPos','txPaid','vatOn','vatR','vatInc','vatPer','pnOn','pnDep','kmR','ddOn','ddAdv','ddDays','incGoal'],DEFSET={rate:600,hrate:0,od:14,cap:122833,capOn:true,fy:0,cb:'work',accent:'',tgt:8,dcc:'IL',lang:'he',fs:1,rmOn:false,rmT:'18:00',bg:'none',bgDim:35,bgSec:45,bgTone:'',bgBlur:0,bgGlass:25,bgFav:[],cur:'₪',otOn:false,otAfter:8,otM1:1.25,otAfter2:10,otM2:1.5,payUrl:'https://app.sumit.co.il',hc:0,tpls:[],snd:1,sndKind:'soft',tts:0,mute:{},qhOn:0,qh1:'22:00',qh2:'07:00',brkMax:30,runMax:12,brPaid:0,nick:'',tap:1,fname:'',lname:'',dob:'',shOn:false,shM:2,shF:'18:00',shT:'19:00',sndMode:'sound',sndVol:70,payName:'סאמיט',txOn:true,txPts:2.25,navPos:'bottom',txPaid:[],vatOn:false,vatR:18,vatInc:'exc',vatPer:2,pnOn:true,pnDep:[],kmR:0,ddOn:false,ddAdv:0,ddDays:2,incGoal:0};
+var META={cr:1,up:1,ver:1,bv:1,_h:1},SETK=['rate','hrate','od','cap','capOn','fy','cb','accent','tgt','dcc','lang','fs','rmOn','rmT','bg','bgDim','bgSec','bgTone','bgBlur','bgGlass','bgFav','cur','otOn','otAfter','otM1','otAfter2','otM2','payUrl','payName','hc','tpls','snd','sndKind','tts','mute','qhOn','qh1','qh2','brkMax','runMax','brPaid','nick','tap','fname','lname','dob','shOn','shM','shF','shT','sndMode','sndVol','txOn','txPts','navPos','txPaid','vatOn','vatR','vatInc','vatPer','pnOn','pnDep','kmR','ddOn','ddAdv','ddDays','incGoal','offD'],DEFSET={rate:600,hrate:0,od:14,cap:122833,capOn:true,fy:0,cb:'work',accent:'',tgt:8,dcc:'IL',lang:'he',fs:1,rmOn:false,rmT:'18:00',bg:'none',bgDim:35,bgSec:45,bgTone:'',bgBlur:0,bgGlass:25,bgFav:[],cur:'₪',otOn:false,otAfter:8,otM1:1.25,otAfter2:10,otM2:1.5,payUrl:'https://app.sumit.co.il',hc:0,tpls:[],snd:1,sndKind:'soft',tts:0,mute:{},qhOn:0,qh1:'22:00',qh2:'07:00',brkMax:30,runMax:12,brPaid:0,nick:'',tap:1,fname:'',lname:'',dob:'',shOn:false,shM:2,shF:'18:00',shT:'19:00',sndMode:'sound',sndVol:70,payName:'סאמיט',txOn:true,txPts:2.25,navPos:'bottom',txPaid:[],vatOn:false,vatR:18,vatInc:'exc',vatPer:2,pnOn:true,pnDep:[],kmR:0,ddOn:false,ddAdv:0,ddDays:2,incGoal:0,offD:{}};
 function c100(n){return Math.round(((+n||0)+Number.EPSILON)*100)}
 function r2(n){return c100(n)/100}
 function stab(o){if(Array.isArray(o))return '['+o.map(stab).join(',')+']';if(o&&typeof o==='object')return '{'+Object.keys(o).sort().map(function(k){return JSON.stringify(k)+':'+stab(o[k])}).join(',')+'}';return JSON.stringify(o===undefined?null:o)}
@@ -1652,6 +1654,8 @@ var ST='main',GY=new Date().getFullYear(),GM=new Date().getMonth();
 function mt(y,m){var pre=y+'-'+String(m+1).padStart(2,'0');return stat(function(e){return e.date.indexOf(pre)===0})}
 function gy(n){GY+=n;rStats()}
 $('stabs').onclick=function(e){var s=e.target.dataset.s;if(s){ST=s;render()}};
+/* income from 1 January to today this year, and from 1 January to the same date a year earlier (only for the current year) */
+function yoyYtd(y,now){if(y!==now.getFullYear())return null;var md=ds(now).slice(4),a=stat(function(e){return e.date>=y+'-01-01'&&e.date<=y+md}).t,b=stat(function(e){return e.date>=(y-1)+'-01-01'&&e.date<=(y-1)+md}).t;return {a:a,b:b,m:now.getMonth(),d:now.getDate()}}
 function dif(a,b){var d=a-b,p=b?Math.round(d/b*100)+'%':'';return '<b style="color:var('+(d>=0?'--ok':'--owe')+')">'+(d>=0?'+':'-')+nis(Math.abs(d))+(p?' ('+(d>=0?'+':'')+p+')':'')+'</b>'}
 function rStats(){
   var M=[],mx=1,T=0,i,nd=new Date(),W=360,base=160,H=130;
@@ -1667,13 +1671,15 @@ function rStats(){
   s+='<line x1="4" x2="'+(W-4)+'" y1="'+base+'" y2="'+base+'" style="stroke:var(--line)"/>';
   if(avg)s+='<line x1="4" x2="'+(W-4)+'" y1="'+(base-avg/mx*H)+'" y2="'+(base-avg/mx*H)+'" stroke-dasharray="3 3" style="stroke:var(--ink);opacity:.5"/>';
   $('gchart').innerHTML=s+'</svg>';
-  var cur=M[GM],pm=mt(GM?GY:GY-1,(GM+11)%12),opt=MN.map(function(n,k){return '<option value="'+k+'"'+(k===GM?' selected':'')+'>'+n+'</option>'}).join('');
+  var cur=M[GM],pm=mt(GM?GY:GY-1,(GM+11)%12),py=mt(GY-1,GM),ytd=yoyYtd(GY,nd),opt=MN.map(function(n,k){return '<option value="'+k+'"'+(k===GM?' selected':'')+'>'+n+'</option>'}).join('');
   $('gfacts').innerHTML='<div class="card"><div class="top"><div><small class="m">סה״כ '+GY+'</small><div class="amt" style="font-size:26px">'+nis(T)+'</div></div><div class="l"><small class="m">ממוצע לחודש<br><b>'+nis(avg)+'</b></small></div></div>'+
     (T?'<p style="margin:10px 0 0">🏆 החודש הכי טוב: <b>'+MN[bi]+'</b> '+nis(M[bi].t)+'</p>':'<p class="m">אין עדיין רישומים בשנה הזו.</p>')+'</div>'+
     '<div class="card"><label for="ggm">השוואה לחודש</label><select id="ggm" onchange="GM=+this.value;rStats()" style="width:100%">'+opt+'</select>'+
     '<p style="margin:10px 0 4px">'+MN[GM]+' '+GY+': <b>'+nis(cur.t)+'</b> · '+cur.d+' ימים</p>'+
     '<p style="margin:4px 0">לעומת '+MN[(GM+11)%12]+': '+dif(cur.t,pm.t)+'</p>'+
-    (avg?'<p style="margin:4px 0">לעומת הממוצע: '+dif(cur.t,avg)+'</p>':'')+'</div>';
+    (avg?'<p style="margin:4px 0">לעומת הממוצע: '+dif(cur.t,avg)+'</p>':'')+
+    '<p style="margin:4px 0" id="gyoy">לעומת '+MN[GM]+' '+(GY-1)+': '+(py.t?dif(cur.t,py.t)+' <small class="m">(אז '+nis(py.t)+' · '+py.d+' ימים)</small>':'<span class="m">אין רישומים באותו חודש בשנה שעברה</span>')+'</p>'+
+    (ytd&&ytd.b?'<p style="margin:4px 0" id="gytd">מתחילת '+GY+' (עד '+ytd.d+'.'+(ytd.m+1)+') לעומת אותה תקופה ב-'+(GY-1)+': '+dif(ytd.a,ytd.b)+'</p>':'')+'</div>'+(typeof offStats==='function'?offStats(GY):'');
   var ord=M.map(function(o,k){return k}).filter(function(k){return M[k].t>0}).sort(function(a,b){return M[b].t-M[a].t});
   $('grank').innerHTML=ord.length?ord.map(function(k,n){return '<div style="margin-bottom:10px"><div class="top"><span>'+(n===0?'🏆 ':'')+MN[k]+'</span><b>'+nis(M[k].t)+'</b></div><div style="height:8px;background:var(--bg);border-radius:6px;margin-top:4px"><div style="height:8px;width:'+Math.max(M[k].t/M[ord[0]].t*100,2)+'%;background:var(--ok);border-radius:6px"></div></div></div>'}).join(''):'<span class="m">אין נתונים להצגה.</span>'}
 function dago(s){var a=s.split('-'),t=new Date();t.setHours(0,0,0,0);return Math.round((t-new Date(+a[0],a[1]-1,+a[2]))/864e5)}
@@ -2190,10 +2196,16 @@ function impGuess(rows){var hi=-1;for(var i=0;i<Math.min(rows.length,30);i++){if
   if(nc2<0)for(var c=0;c<nc;c++)if(c!==dc&&c!==ac&&share(function(r){return /[א-תA-Za-z]/.test(String(r[c]||''))})>0.5){nc2=c;break}
   var names=[];for(var x=0;x<nc;x++)names.push(hd[x]||('עמודה '+(x+1)));
   return {hi:hi,names:names,body:body,d:dc,n:nc2,a:ac}}
-/* candidate expenses from the chosen columns: valid date and a non-zero amount; dup = same date and amount already in the expenses */
-function impRows(g,dc,nc,ac){var have={};(S.expenses||[]).forEach(function(x){have[x.date+'|'+c100(x.amount)]=1});var out=[];
-  g.body.forEach(function(r){var d=impDate(r[dc]),a=impNum(r[ac]);if(!d||!isFinite(a)||Math.abs(a)<0.005)return;a=Math.abs(Math.round(a*100)/100);
-    out.push({d:d,a:a,n:nc>=0?String(r[nc]||'').replace(/\s+/g,' ').trim().slice(0,120):'',dup:!!have[d+'|'+c100(a)]})});
+/* a merchant / description -> a key for remembering its category (no digits, punctuation or extra spaces) */
+function impKey(n){return String(n||'').toLowerCase().replace(/[\u200e\u200f"'״׳.,:;!?\-_*#\/\\()\[\]|+]/g,' ').replace(/\d+/g,' ').replace(/\s+/g,' ').trim().slice(0,40)}
+/* category of earlier expenses with the same merchant / description (the latest one wins; the default "אחר" is not remembered) */
+function impMem(){var m={};(S.expenses||[]).slice().sort(function(a,b){return String(a.date).localeCompare(String(b.date))}).forEach(function(x){var k=impKey(x.note),c=String(x.cat||'').trim();if(k.length>=2&&c&&c!=='אחר')m[k]=c});return m}
+/* candidate expenses from the chosen columns: valid date and a non-zero amount; dup = same date and amount already in the expenses.
+   cr = a refund / money in: when the file has both signs, the rows with the less common sign (a tie: the negative ones) */
+function impRows(g,dc,nc,ac){var have={},mem=impMem();(S.expenses||[]).forEach(function(x){have[x.date+'|'+c100(x.amount)]=1});var out=[],pos=0,neg=0;
+  g.body.forEach(function(r){var d=impDate(r[dc]),a=impNum(r[ac]);if(!d||!isFinite(a)||Math.abs(a)<0.005)return;var sg=a<0?-1:1;if(sg<0)neg++;else pos++;a=Math.abs(Math.round(a*100)/100);
+    var n=nc>=0?String(r[nc]||'').replace(/\s+/g,' ').trim().slice(0,120):'';out.push({d:d,a:a,n:n,sg:sg,c:mem[impKey(n)]||'',dup:!!have[d+'|'+c100(a)]})});
+  var crS=pos&&neg?(neg<=pos?-1:1):0;out.forEach(function(r){r.cr=!!crS&&r.sg===crS});
   return out}
 async function impFile(f){if(!f)return;var nm=(f.name||'').toLowerCase();
   if(/\.xls$/.test(nm))return info('זה קובץ Excel ישן (xls). פתח אותו ב-Excel ושמור בשם כ-xlsx או CSV, ואז ייבא שוב.');
@@ -2207,28 +2219,51 @@ async function impFile(f){if(!f)return;var nm=(f.name||'').toLowerCase();
   catch(e){info('לא הצלחתי לקרוא את הקובץ: '+(e&&e.message||e))}}
 function impOpts(sel,none){return (none?'<option value="-1">ללא</option>':'')+IMP.g.names.map(function(n,i){return '<option value="'+i+'"'+(i===sel?' selected':'')+'>'+esc(n)+'</option>'}).join('')}
 function impSheet(){var g=IMP.g;
-  $('sheetBody').innerHTML='<b>ייבוא הוצאות מקובץ</b><small class="m">'+esc(IMP.f)+'. בחר אילו שורות הן הוצאות של העסק. שורות שכבר רשומות (אותו תאריך ואותו סכום) מסומנות.</small>'+
+  $('sheetBody').innerHTML='<b>ייבוא הוצאות מקובץ</b><small class="m">'+esc(IMP.f)+'. בחר אילו שורות הן הוצאות של העסק. שורות שכבר רשומות (אותו תאריך ואותו סכום) וזיכויים או כסף שנכנס מסומנים, ו"בחירת הכל" לא בוחר אותם.</small>'+
     '<div class="two"><div><label for="imD">עמודת תאריך</label><select id="imD" style="width:100%" onchange="impList()">'+impOpts(g.d)+'</select></div><div><label for="imA">עמודת סכום</label><select id="imA" style="width:100%" onchange="impList()">'+impOpts(g.a)+'</select></div></div>'+
     '<label for="imN">עמודת תיאור (נכנס להערה)</label><select id="imN" style="width:100%" onchange="impList()">'+impOpts(g.n,1)+'</select>'+
     '<label for="imC">קטגוריה לשורות שנבחרו</label><input id="imC" list="xCats" autocomplete="off" value="אחר">'+
+    '<label class="imMemL" id="imMemL" style="display:flex;gap:8px;align-items:center;font-weight:400;margin-top:6px" hidden><input type="checkbox" id="imMem" checked style="width:auto;flex:none">לשורות של בית עסק מוכר: הקטגוריה מהפעם הקודמת</label>'+
     (S.vatOn?'<label for="imV">מע״מ בהוצאות</label><select id="imV" style="width:100%"><option value="1">יש בהן מע״מ (כלול בסכום)</option><option value="0">בלי מע״מ</option></select>':'')+
     '<div class="acts" style="margin-top:8px"><button class="ghost" onclick="impAll(1)">בחירת הכל</button><button class="ghost" onclick="impAll(0)">ניקוי</button></div>'+
     '<div id="imL" style="max-height:42vh;overflow:auto;margin:6px 0"></div><div id="imE" class="owe" role="alert"></div>'+
     '<button id="imGo" onclick="impSave()">הוספת ההוצאות שנבחרו</button><button class="ghost" onclick="closeS()">ביטול</button>';$('sheet').hidden=false;impList()}
 function impList(){var dc=+$('imD').value,ac=+$('imA').value,nc=+$('imN').value,l=impRows(IMP.g,dc,nc,ac);IMP.l=l;
-  $('imL').innerHTML=l.length?l.map(function(r,i){return '<label class="imRow" style="display:flex;gap:8px;align-items:center;margin:4px 0;font-weight:400"><input type="checkbox" data-i="'+i+'" onchange="impCnt()" style="width:auto;flex:none"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+fmt(r.d)+' · '+esc(r.n||'—')+(r.dup?' <small class="m">(כבר רשום)</small>':'')+'</span><b style="flex:none">'+nis(r.a)+'</b></label>'}).join(''):'<span class="m">לא נמצאו שורות עם תאריך וסכום בעמודות שנבחרו.</span>';impCnt()}
+  $('imL').innerHTML=l.length?l.map(function(r,i){return '<label class="imRow" style="display:flex;gap:8px;align-items:center;margin:4px 0;font-weight:400"><input type="checkbox" data-i="'+i+'" onchange="impCnt()" style="width:auto;flex:none"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+fmt(r.d)+' · '+esc(r.n||'—')+(r.dup?' <small class="m">(כבר רשום)</small>':'')+(r.cr?' <small class="owe">(זיכוי / נכנס)</small>':'')+(r.c?' <small class="m">· '+esc(r.c)+'</small>':'')+'</span><b style="flex:none">'+nis(r.a)+'</b></label>'}).join(''):'<span class="m">לא נמצאו שורות עם תאריך וסכום בעמודות שנבחרו.</span>';var ml=$('imMemL');if(ml)ml.hidden=!l.some(function(r){return r.c});impCnt()}
 function impSel(){return [].filter.call(document.querySelectorAll('#imL input[type=checkbox]'),function(c){return c.checked}).map(function(c){return IMP.l[+c.dataset.i]})}
-function impAll(on){[].forEach.call(document.querySelectorAll('#imL input[type=checkbox]'),function(c){c.checked=!!on&&!IMP.l[+c.dataset.i].dup});impCnt()}
+function impAll(on){[].forEach.call(document.querySelectorAll('#imL input[type=checkbox]'),function(c){var r=IMP.l[+c.dataset.i];c.checked=!!on&&!r.dup&&!r.cr});impCnt()}
 function impCnt(){var s=impSel(),b=$('imGo');if(b)b.textContent=s.length?'הוספת '+s.length+' הוצאות ('+nis(s.reduce(function(a,r){return a+r.a},0))+')':'הוספת ההוצאות שנבחרו'}
 function impSave(){var s=impSel(),e=$('imE');if(!s.length){e.textContent='סמן לפחות שורה אחת';return}
-  var cat=$('imC').value.replace(/\s+/g,' ').trim()||'אחר',v=$('imV'),nv=S.vatOn&&v&&v.value==='0',ids={};S.expenses=S.expenses||[];S.expenses.forEach(function(x){ids[x.id]=1});
-  var base=uid();s.forEach(function(r,i){var id=base+i;while(ids[id])id++;ids[id]=1;var x={id:id,date:r.d,amount:r.a,cat:cat,note:r.n,cid:0};if(nv)x.nv=1;S.expenses.push(x)});
+  var cat=$('imC').value.replace(/\s+/g,' ').trim()||'אחר',v=$('imV'),nv=S.vatOn&&v&&v.value==='0',mm=$('imMem'),useMem=!!(mm&&mm.checked),ids={};S.expenses=S.expenses||[];S.expenses.forEach(function(x){ids[x.id]=1});
+  var base=uid();s.forEach(function(r,i){var id=base+i;while(ids[id])id++;ids[id]=1;var x={id:id,date:r.d,amount:r.a,cat:useMem&&r.c?r.c:cat,note:r.n,cid:0};if(nv)x.nv=1;S.expenses.push(x)});
   IMP=null;closeS();save();render();okSave('נוספו '+s.length+' הוצאות')}
 try{$('impF').onchange=function(){var f=this.files&&this.files[0];this.value='';impFile(f)}}catch(e){}
 
 /* ---------- settings ---------- */
 function plSetVals(){var g=$('sgoal');if(g&&document.activeElement!==g)g.value=goalAmt()||''}
 try{$('sgoal').onchange=function(){var v=Math.round(parseFloat(this.value));S.incGoal=isFinite(v)&&v>0&&v<10000000?v:0;save();render()}}catch(e){}
+
+/* ---------- beta.39: days off — reserve duty (מילואים), sick, vacation. S.offD = {'YYYY-MM-DD': 'res' | 'sick' | 'vac'} (synced with the settings) ---------- */
+var OFFK={res:'מילואים',sick:'מחלה',vac:'חופשה'},OFFS={res:'מיל',sick:'מחל',vac:'חופ'};
+function offMap(){var o=S.offD;return o&&typeof o==='object'&&!Array.isArray(o)?o:{}}
+function offOf(d){var k=offMap()[d];return OFFK[k]?k:''}
+/* mark a day; the same kind again clears it */
+function offSet(d,k){if(!/^\d{4}-\d{2}-\d{2}$/.test(String(d)))return;var o=Object.assign({},offMap());if(OFFK[k]&&o[d]!==k)o[d]=k;else delete o[d];S.offD=o;save();render()}
+function offCount(pre){var c={res:0,sick:0,vac:0},o=offMap();Object.keys(o).forEach(function(d){if(d.indexOf(pre)===0&&c[o[d]]!==undefined)c[o[d]]++});return c}
+function offDates(pre,k){var o=offMap();return Object.keys(o).filter(function(d){return d.indexOf(pre)===0&&o[d]===k}).sort()}
+function offTxt(c){return Object.keys(OFFK).filter(function(k){return c[k]}).map(function(k){return OFFK[k]+' '+c[k]}).join(' · ')}
+function offMark(d){var k=offOf(d);return k?'<b class="offm off-'+k+'" aria-label="'+OFFK[k]+'">'+OFFS[k]+'</b>':''}
+/* the calendar card under the month grid: what the selected day was, and this month's count */
+function offRender(){var b=$('offBox');if(!b||typeof selD!=='string')return;var k=offOf(selD),pre=cal.getFullYear()+'-'+String(cal.getMonth()+1).padStart(2,'0'),t=offTxt(offCount(pre));
+  b.innerHTML='<small class="m">לא עבדת ב-'+fmt(selD)+'? אפשר לסמן למה (לחיצה נוספת מבטלת):</small><div class="acts" style="margin:6px 0 0">'+
+    Object.keys(OFFK).map(function(x){return '<button class="'+(k===x?'':'ghost')+'" style="padding:6px 12px;font-size:14px" aria-pressed="'+(k===x)+'" onclick="offSet(selD,\''+x+'\')">'+OFFK[x]+'</button>'}).join('')+'</div>'+
+    (t?'<small class="m" style="display:block;margin-top:6px">החודש: '+t+'</small>':'')}
+/* statistics: the days off of the year, and the reserve-duty dates to copy (for a Bituach Leumi claim) */
+function offStats(y){var c=offCount(y+'-');if(!c.res&&!c.sick&&!c.vac)return '';
+  return '<div class="card" id="offStats"><b>ימים שלא עבדת ב-'+y+'</b><p style="margin:6px 0">'+offTxt(c)+'</p>'+
+    (c.res?'<small class="m" style="display:block">תאריכי המילואים: '+offDates(y+'-','res').map(function(d){return fmt(d)}).join(', ')+'</small><button class="ghost" style="margin-top:8px" onclick="offCopy(this,'+y+')">העתקת תאריכי המילואים</button>':'')+'</div>'}
+function offCopyTxt(y){var l=offDates(y+'-','res');return 'ימי מילואים '+y+' ('+l.length+'): '+l.map(function(d){return fmt(d)}).join(', ')}
+function offCopy(b,y){try{navigator.clipboard.writeText(offCopyTxt(y)).then(function(){b.textContent='הועתק'},function(){b.textContent='ההעתקה נכשלה'})}catch(e){b.textContent='ההעתקה נכשלה'}}
 
 /* ===== module: 68-i18n.js ===== */
 /* i18n: Hebrew is the source language. TX maps exact Hebrew UI text -> translations. Coverage is PARTIAL (navigation, titles and common buttons); untranslated text stays Hebrew. */
@@ -2290,6 +2325,7 @@ PHK.forEach(function(he){var e=he.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');try{PHRE
 var MONTHS={};
 function monthMap(lang,locale){if(MONTHS[lang])return MONTHS[lang];var m={};for(var i=0;i<12;i++){var d=new Date(2000,i,1);m[d.toLocaleDateString('he-IL',{month:'long'})]=d.toLocaleDateString(locale,{month:'long'})}for(var j=0;j<7;j++){var w=new Date(2023,0,1+j);m[w.toLocaleDateString('he-IL',{weekday:'narrow'})]=w.toLocaleDateString(locale,{weekday:'narrow'});m[w.toLocaleDateString('he-IL',{weekday:'short'})]=w.toLocaleDateString(locale,{weekday:'short'});m['אבגדהוש'.charAt(j)]=w.toLocaleDateString(locale,{weekday:'narrow'})}return MONTHS[lang]=m}
 (function(){var X={"ייבוא מהבנק או מכרטיס האשראי": {"en": "Import from the bank or credit card", "ar": "الاستيراد من البنك أو بطاقة الائتمان", "ru": "Импорт из банка или с кредитной карты", "fr": "Importer depuis la banque ou la carte de crédit", "es": "Importar del banco o de la tarjeta de crédito"}, "קובץ CSV או Excel (xlsx) שהורדת מהבנק או מחברת האשראי. בוחרים אילו שורות הן הוצאות של העסק, והן נוספות לרשימה.": {"en": "A CSV or Excel (xlsx) file you downloaded from your bank or credit card company. Choose which rows are business expenses, and they are added to the list.", "ar": "ملف CSV أو Excel (xlsx) نزّلته من البنك أو شركة بطاقة الائتمان. اختر الصفوف التي هي مصاريف للعمل، فتُضاف إلى القائمة.", "ru": "Файл CSV или Excel (xlsx), скачанный из банка или компании кредитных карт. Выберите строки, которые являются расходами бизнеса, и они добавятся в список.", "fr": "Un fichier CSV ou Excel (xlsx) téléchargé depuis votre banque ou votre société de carte de crédit. Choisissez les lignes qui sont des dépenses professionnelles, elles sont ajoutées à la liste.", "es": "Un archivo CSV o Excel (xlsx) que descargaste del banco o de la compañía de la tarjeta. Elige qué filas son gastos del negocio y se añaden a la lista."}, "ייבוא הוצאות מקובץ": {"en": "Import expenses from a file", "ar": "استيراد المصاريف من ملف", "ru": "Импорт расходов из файла", "fr": "Importer des dépenses depuis un fichier", "es": "Importar gastos desde un archivo"}, "יעד הכנסה חודשי (₪)": {"en": "Monthly income goal (₪)", "ar": "هدف الدخل الشهري (₪)", "ru": "Цель дохода на месяц (₪)", "fr": "Objectif de revenu mensuel (₪)", "es": "Meta de ingresos mensual (₪)"}, "כשיש יעד, בדשבורד מופיע כמה כבר הרווחת החודש וכמה נשאר.": {"en": "With a goal set, the dashboard shows how much you have earned this month and how much is left.", "ar": "عند تحديد هدف، تعرض لوحة المعلومات كم ربحت هذا الشهر وكم تبقى.", "ru": "Если задана цель, на дашборде видно, сколько вы уже заработали в этом месяце и сколько осталось.", "fr": "Avec un objectif, le tableau de bord montre combien vous avez gagné ce mois-ci et ce qu'il reste.", "es": "Con una meta, el panel muestra cuánto ganaste este mes y cuánto falta."}, "כשה-15 נופל בשבת או בחג, המועד עובר ליום שאחריו.": {"en": "When the 15th falls on Saturday or a holiday, the deadline moves to the next day.", "ar": "إذا وقع يوم 15 في يوم سبت أو عيد، ينتقل الموعد إلى اليوم التالي.", "ru": "Если 15-е число выпадает на субботу или праздник, срок переносится на следующий день.", "fr": "Quand le 15 tombe un samedi ou un jour férié, l'échéance passe au lendemain.", "es": "Si el 15 cae en sábado o festivo, el plazo pasa al día siguiente."}, "ריק = בלי יעד": {"en": "Empty = no goal", "ar": "فارغ = بلا هدف", "ru": "Пусто = без цели", "fr": "Vide = pas d'objectif", "es": "Vacío = sin meta"}, "יעד החודש": {"en": "This month's goal", "ar": "هدف هذا الشهر", "ru": "Цель месяца", "fr": "Objectif du mois", "es": "Meta del mes"}, "הכנסות החודש (לפי תאריך עבודה)": {"en": "Income this month (by work date)", "ar": "دخل هذا الشهر (حسب تاريخ العمل)", "ru": "Доход за месяц (по дате работы)", "fr": "Revenus du mois (par date de travail)", "es": "Ingresos del mes (por fecha de trabajo)"}, "הגעת ליעד!": {"en": "Goal reached!", "ar": "وصلت إلى الهدف!", "ru": "Цель достигнута!", "fr": "Objectif atteint !", "es": "¡Meta alcanzada!"}};Object.keys(X).forEach(function(k){if(!TX[k])TX[k]={};Object.keys(X[k]).forEach(function(l){if(!TX[k][l])TX[k][l]=X[k][l]})})})();
+(function(){var X={"מילואים": {"en": "Reserve duty", "ar": "خدمة الاحتياط", "ru": "Милуим (резерв)", "fr": "Service de réserve", "es": "Servicio de reserva"}, "מחלה": {"en": "Sick", "ar": "مرض", "ru": "Болезнь", "fr": "Maladie", "es": "Enfermedad"}, "חופשה": {"en": "Vacation", "ar": "إجازة", "ru": "Отпуск", "fr": "Congé", "es": "Vacaciones"}, "העתקת תאריכי המילואים": {"en": "Copy the reserve-duty dates", "ar": "نسخ تواريخ الاحتياط", "ru": "Скопировать даты милуим", "fr": "Copier les dates de réserve", "es": "Copiar las fechas de reserva"}, "לשורות של בית עסק מוכר: הקטגוריה מהפעם הקודמת": {"en": "Known merchants: use the category from last time", "ar": "للمتاجر المعروفة: الفئة من المرة السابقة", "ru": "Для известных магазинов: категория из прошлого раза", "fr": "Commerçants connus : la catégorie de la dernière fois", "es": "Comercios conocidos: la categoría de la última vez"}};Object.keys(X).forEach(function(k){if(!TX[k])TX[k]={};Object.keys(X[k]).forEach(function(l){if(!TX[k][l])TX[k][l]=X[k][l]})})})();
 
 /* ===== module: 70-ui.js ===== */
 var ACCENTS=[['','ברירת מחדל','#12302d'],['#1d4ed8','כחול','#1d4ed8'],['#6d28d9','סגול','#6d28d9'],['#15803d','ירוק','#15803d'],['#c2410c','כתום','#c2410c'],['#be123c','אדום','#be123c']];
@@ -2347,8 +2383,8 @@ function rCal(){var y=cal.getFullYear(),m=cal.getMonth(),t=today(),first=new Dat
   var h=['א','ב','ג','ד','ה','ו','ש'].map(function(x){return '<i>'+x+'</i>'}).join('');
   for(var i=0;i<first;i++)h+='<span></span>';
   for(var d=1;d<=n;d++){var s=ds(new Date(y,m,d)),o=st[s];
-    h+='<button class="d '+(s===selD?'sel ':'')+(s===t?'td':'')+'" onclick="pick(\''+s+'\')">'+d+(o?'<u class="'+(o.u?'u':'p')+'"></u>':'')+'</button>'}
-  $('cgrid').innerHTML=h;
+    h+='<button class="d '+(s===selD?'sel ':'')+(s===t?'td':'')+'" onclick="pick(\''+s+'\')">'+d+(o?'<u class="'+(o.u?'u':'p')+'"></u>':'')+(typeof offMark==='function'?offMark(s):'')+'</button>'}
+  $('cgrid').innerHTML=h;try{if(typeof offRender==='function')offRender()}catch(e){}
   var pre=y+'-'+String(m+1).padStart(2,'0'),me=S.entries.filter(function(e){return e.date.indexOf(pre)===0});
   $('cinfo').textContent='נבחר: '+fmt(selD)+' · החודש: '+me.reduce(function(s,e){return s+e.days},0)+' ימים, '+hf(me.reduce(function(s,e){return s+eh(e)},0))+' שעות, '+nis(me.reduce(function(s,e){return s+e.amount},0))+' (אדום: יש חוב, ירוק: שולם)';
   $('clients').innerHTML=S.clients.filter(function(c){return !c.arch&&c.kind!=='pro'}).map(function(c){return '<option value="'+esc(c.name)+'">'}).join('');$('chips').innerHTML=recent().map(function(c){return '<button class="ghost" style="padding:6px 12px;font-size:14px" onclick="chip('+c.id+')">'+esc(c.name)+'</button>'}).join('');

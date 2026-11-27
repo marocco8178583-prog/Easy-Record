@@ -5,6 +5,8 @@ var ST='main',GY=new Date().getFullYear(),GM=new Date().getMonth();
 function mt(y,m){var pre=y+'-'+String(m+1).padStart(2,'0');return stat(function(e){return e.date.indexOf(pre)===0})}
 function gy(n){GY+=n;rStats()}
 $('stabs').onclick=function(e){var s=e.target.dataset.s;if(s){ST=s;render()}};
+/* income from 1 January to today this year, and from 1 January to the same date a year earlier (only for the current year) */
+function yoyYtd(y,now){if(y!==now.getFullYear())return null;var md=ds(now).slice(4),a=stat(function(e){return e.date>=y+'-01-01'&&e.date<=y+md}).t,b=stat(function(e){return e.date>=(y-1)+'-01-01'&&e.date<=(y-1)+md}).t;return {a:a,b:b,m:now.getMonth(),d:now.getDate()}}
 function dif(a,b){var d=a-b,p=b?Math.round(d/b*100)+'%':'';return '<b style="color:var('+(d>=0?'--ok':'--owe')+')">'+(d>=0?'+':'-')+nis(Math.abs(d))+(p?' ('+(d>=0?'+':'')+p+')':'')+'</b>'}
 function rStats(){
   var M=[],mx=1,T=0,i,nd=new Date(),W=360,base=160,H=130;
@@ -20,13 +22,15 @@ function rStats(){
   s+='<line x1="4" x2="'+(W-4)+'" y1="'+base+'" y2="'+base+'" style="stroke:var(--line)"/>';
   if(avg)s+='<line x1="4" x2="'+(W-4)+'" y1="'+(base-avg/mx*H)+'" y2="'+(base-avg/mx*H)+'" stroke-dasharray="3 3" style="stroke:var(--ink);opacity:.5"/>';
   $('gchart').innerHTML=s+'</svg>';
-  var cur=M[GM],pm=mt(GM?GY:GY-1,(GM+11)%12),opt=MN.map(function(n,k){return '<option value="'+k+'"'+(k===GM?' selected':'')+'>'+n+'</option>'}).join('');
+  var cur=M[GM],pm=mt(GM?GY:GY-1,(GM+11)%12),py=mt(GY-1,GM),ytd=yoyYtd(GY,nd),opt=MN.map(function(n,k){return '<option value="'+k+'"'+(k===GM?' selected':'')+'>'+n+'</option>'}).join('');
   $('gfacts').innerHTML='<div class="card"><div class="top"><div><small class="m">סה״כ '+GY+'</small><div class="amt" style="font-size:26px">'+nis(T)+'</div></div><div class="l"><small class="m">ממוצע לחודש<br><b>'+nis(avg)+'</b></small></div></div>'+
     (T?'<p style="margin:10px 0 0">🏆 החודש הכי טוב: <b>'+MN[bi]+'</b> '+nis(M[bi].t)+'</p>':'<p class="m">אין עדיין רישומים בשנה הזו.</p>')+'</div>'+
     '<div class="card"><label for="ggm">השוואה לחודש</label><select id="ggm" onchange="GM=+this.value;rStats()" style="width:100%">'+opt+'</select>'+
     '<p style="margin:10px 0 4px">'+MN[GM]+' '+GY+': <b>'+nis(cur.t)+'</b> · '+cur.d+' ימים</p>'+
     '<p style="margin:4px 0">לעומת '+MN[(GM+11)%12]+': '+dif(cur.t,pm.t)+'</p>'+
-    (avg?'<p style="margin:4px 0">לעומת הממוצע: '+dif(cur.t,avg)+'</p>':'')+'</div>';
+    (avg?'<p style="margin:4px 0">לעומת הממוצע: '+dif(cur.t,avg)+'</p>':'')+
+    '<p style="margin:4px 0" id="gyoy">לעומת '+MN[GM]+' '+(GY-1)+': '+(py.t?dif(cur.t,py.t)+' <small class="m">(אז '+nis(py.t)+' · '+py.d+' ימים)</small>':'<span class="m">אין רישומים באותו חודש בשנה שעברה</span>')+'</p>'+
+    (ytd&&ytd.b?'<p style="margin:4px 0" id="gytd">מתחילת '+GY+' (עד '+ytd.d+'.'+(ytd.m+1)+') לעומת אותה תקופה ב-'+(GY-1)+': '+dif(ytd.a,ytd.b)+'</p>':'')+'</div>'+(typeof offStats==='function'?offStats(GY):'');
   var ord=M.map(function(o,k){return k}).filter(function(k){return M[k].t>0}).sort(function(a,b){return M[b].t-M[a].t});
   $('grank').innerHTML=ord.length?ord.map(function(k,n){return '<div style="margin-bottom:10px"><div class="top"><span>'+(n===0?'🏆 ':'')+MN[k]+'</span><b>'+nis(M[k].t)+'</b></div><div style="height:8px;background:var(--bg);border-radius:6px;margin-top:4px"><div style="height:8px;width:'+Math.max(M[k].t/M[ord[0]].t*100,2)+'%;background:var(--ok);border-radius:6px"></div></div></div>'}).join(''):'<span class="m">אין נתונים להצגה.</span>'}
 function dago(s){var a=s.split('-'),t=new Date();t.setHours(0,0,0,0);return Math.round((t-new Date(+a[0],a[1]-1,+a[2]))/864e5)}

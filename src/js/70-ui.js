@@ -53,8 +53,8 @@ function rCal(){var y=cal.getFullYear(),m=cal.getMonth(),t=today(),first=new Dat
   var h=['א','ב','ג','ד','ה','ו','ש'].map(function(x){return '<i>'+x+'</i>'}).join('');
   for(var i=0;i<first;i++)h+='<span></span>';
   for(var d=1;d<=n;d++){var s=ds(new Date(y,m,d)),o=st[s];
-    h+='<button class="d '+(s===selD?'sel ':'')+(s===t?'td':'')+'" onclick="pick(\''+s+'\')">'+d+(o?'<u class="'+(o.u?'u':'p')+'"></u>':'')+'</button>'}
-  $('cgrid').innerHTML=h;
+    h+='<button class="d '+(s===selD?'sel ':'')+(s===t?'td':'')+'" onclick="pick(\''+s+'\')">'+d+(o?'<u class="'+(o.u?'u':'p')+'"></u>':'')+(typeof offMark==='function'?offMark(s):'')+'</button>'}
+  $('cgrid').innerHTML=h;try{if(typeof offRender==='function')offRender()}catch(e){}
   var pre=y+'-'+String(m+1).padStart(2,'0'),me=S.entries.filter(function(e){return e.date.indexOf(pre)===0});
   $('cinfo').textContent='נבחר: '+fmt(selD)+' · החודש: '+me.reduce(function(s,e){return s+e.days},0)+' ימים, '+hf(me.reduce(function(s,e){return s+eh(e)},0))+' שעות, '+nis(me.reduce(function(s,e){return s+e.amount},0))+' (אדום: יש חוב, ירוק: שולם)';
   $('clients').innerHTML=S.clients.filter(function(c){return !c.arch&&c.kind!=='pro'}).map(function(c){return '<option value="'+esc(c.name)+'">'}).join('');$('chips').innerHTML=recent().map(function(c){return '<button class="ghost" style="padding:6px 12px;font-size:14px" onclick="chip('+c.id+')">'+esc(c.name)+'</button>'}).join('');
