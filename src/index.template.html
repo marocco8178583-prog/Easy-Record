@@ -98,7 +98,7 @@
     <h2>הוצאה חדשה</h2>
     <div class="card">
       <div class="two"><div><label for="xA">סכום (₪)</label><input id="xA" type="number" inputmode="decimal" min="0" step="1"></div><div><label for="xD">תאריך</label><input id="xD" type="date"></div></div>
-      <label for="xC">קטגוריה</label><input id="xC" list="xCats" autocomplete="off" placeholder="דלק, כלים, חומרים, ביטוח..."><datalist id="xCats"></datalist>
+      <label for="xC">קטגוריה</label><input id="xC" list="xCats" autocomplete="off" oninput="xcSync('xC')" placeholder="בחר למטה, או הקלד קטגוריה משלך"><datalist id="xCats"></datalist><div id="xCKw"></div><small class="m">בלי קטגוריה: האפליקציה מנחשת לפי ההערה (למשל "פז" → דלק), אחרת "אחר".</small>
       <label for="xCl">לקוח קשור (לא חובה)</label><select id="xCl" style="width:100%"></select>
       <label for="xN">הערה (לא חובה)</label><input id="xN" autocomplete="off">
       <div id="xVatW" hidden><label for="xVat">מע״מ בהוצאה</label><select id="xVat" style="width:100%"><option value="1">יש בה מע״מ (כלול בסכום)</option><option value="0">בלי מע״מ</option></select></div>

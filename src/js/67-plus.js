@@ -63,7 +63,7 @@ function impMem(){var m={};(S.expenses||[]).slice().sort(function(a,b){return St
    cr = a refund / money in: when the file has both signs, the rows with the less common sign (a tie: the negative ones) */
 function impRows(g,dc,nc,ac){var have={},mem=impMem();(S.expenses||[]).forEach(function(x){have[x.date+'|'+c100(x.amount)]=1});var out=[],pos=0,neg=0;
   g.body.forEach(function(r){var d=impDate(r[dc]),a=impNum(r[ac]);if(!d||!isFinite(a)||Math.abs(a)<0.005)return;var sg=a<0?-1:1;if(sg<0)neg++;else pos++;a=Math.abs(Math.round(a*100)/100);
-    var n=nc>=0?String(r[nc]||'').replace(/\s+/g,' ').trim().slice(0,120):'';out.push({d:d,a:a,n:n,sg:sg,c:mem[impKey(n)]||'',dup:!!have[d+'|'+c100(a)]})});
+    var n=nc>=0?String(r[nc]||'').replace(/\s+/g,' ').trim().slice(0,120):'';var mc=mem[impKey(n)]||'',gc=mc?'':(typeof catGuess==='function'?catGuess(n):'');out.push({d:d,a:a,n:n,sg:sg,c:mc||gc,cs:mc?'mem':gc?'auto':'',dup:!!have[d+'|'+c100(a)]})});
   var crS=pos&&neg?(neg<=pos?-1:1):0;out.forEach(function(r){r.cr=!!crS&&r.sg===crS});
   return out}
 async function impFile(f){if(!f)return;var nm=(f.name||'').toLowerCase();
@@ -81,11 +81,11 @@ function impSheet(){var g=IMP.g;
   $('sheetBody').innerHTML='<b>ייבוא הוצאות מקובץ</b><small class="m">'+esc(IMP.f)+'. בחר אילו שורות הן הוצאות של העסק. שורות שכבר רשומות (אותו תאריך ואותו סכום) וזיכויים או כסף שנכנס מסומנים, ו"בחירת הכל" לא בוחר אותם.</small>'+
     '<div class="two"><div><label for="imD">עמודת תאריך</label><select id="imD" style="width:100%" onchange="impList()">'+impOpts(g.d)+'</select></div><div><label for="imA">עמודת סכום</label><select id="imA" style="width:100%" onchange="impList()">'+impOpts(g.a)+'</select></div></div>'+
     '<label for="imN">עמודת תיאור (נכנס להערה)</label><select id="imN" style="width:100%" onchange="impList()">'+impOpts(g.n,1)+'</select>'+
-    '<label for="imC">קטגוריה לשורות שנבחרו</label><input id="imC" list="xCats" autocomplete="off" value="אחר">'+
-    '<label class="imMemL" id="imMemL" style="display:flex;gap:8px;align-items:center;font-weight:400;margin-top:6px" hidden><input type="checkbox" id="imMem" checked style="width:auto;flex:none">לשורות של בית עסק מוכר: הקטגוריה מהפעם הקודמת</label>'+
+    '<label for="imC">קטגוריה לשאר השורות שנבחרו</label><input id="imC" list="xCats" autocomplete="off" value="אחר" oninput="xcSync(\'imC\')">'+(typeof xcChipsH==='function'?xcChipsH('imC','אחר'):'')+
+    '<label class="imMemL" id="imMemL" style="display:flex;gap:8px;align-items:center;font-weight:400;margin-top:6px" hidden><input type="checkbox" id="imMem" checked style="width:auto;flex:none">קטגוריה אוטומטית לפי בית העסק (מהפעם הקודמת, או לפי השם)</label>'+
     (S.vatOn?'<label for="imV">מע״מ בהוצאות</label><select id="imV" style="width:100%"><option value="1">יש בהן מע״מ (כלול בסכום)</option><option value="0">בלי מע״מ</option></select>':'')+
     '<div class="acts" style="margin-top:8px"><button class="ghost" onclick="impAll(1)">בחירת הכל</button><button class="ghost" onclick="impAll(0)">ניקוי</button></div>'+
-    '<div id="imL" style="max-height:42vh;overflow:auto;margin:6px 0"></div><div id="imE" class="owe" role="alert"></div>'+
+    '<div id="imL" style="max-height:42vh;min-height:44px;flex-shrink:0;overflow:auto;margin:6px 0"></div><div id="imE" class="owe" role="alert"></div>'+
     '<button id="imGo" onclick="impSave()">הוספת ההוצאות שנבחרו</button><button class="ghost" onclick="closeS()">ביטול</button>';$('sheet').hidden=false;impList()}
 function impList(){var dc=+$('imD').value,ac=+$('imA').value,nc=+$('imN').value,l=impRows(IMP.g,dc,nc,ac);IMP.l=l;
   $('imL').innerHTML=l.length?l.map(function(r,i){return '<label class="imRow" style="display:flex;gap:8px;align-items:center;margin:4px 0;font-weight:400"><input type="checkbox" data-i="'+i+'" onchange="impCnt()" style="width:auto;flex:none"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+fmt(r.d)+' · '+esc(r.n||'—')+(r.dup?' <small class="m">(כבר רשום)</small>':'')+(r.cr?' <small class="owe">(זיכוי / נכנס)</small>':'')+(r.c?' <small class="m">· '+esc(r.c)+'</small>':'')+'</span><b style="flex:none">'+nis(r.a)+'</b></label>'}).join(''):'<span class="m">לא נמצאו שורות עם תאריך וסכום בעמודות שנבחרו.</span>';var ml=$('imMemL');if(ml)ml.hidden=!l.some(function(r){return r.c});impCnt()}

@@ -200,3 +200,16 @@ html[data-nav] main{padding-bottom:32px}
 html[data-nav=right] main{padding-right:84px}
 html[data-nav=left] main{padding-left:84px}
 html[data-nav] #toast{bottom:calc(20px + env(safe-area-inset-bottom,0px))}
+
+/* beta.40: expense categories */
+.xcGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:8px 0}
+button.xcChip{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;padding:8px 2px;min-height:0;background:transparent;border:1px solid var(--line);border-radius:12px;color:var(--ink);font-size:11px;font-weight:500;line-height:1.2;min-width:0}
+button.xcChip span:last-child{max-width:100%;overflow-wrap:anywhere;text-align:center}
+button.xcChip.on{border:2px solid var(--brand);padding:7px 1px;background:color-mix(in srgb,var(--brand) 10%,transparent);font-weight:700}
+.xcI{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;color:#fff;flex:none}
+.xcI svg{width:17px;height:17px}
+.xcI.xcIn{width:22px;height:22px;vertical-align:-6px;margin-inline-end:6px}.xcI.xcIn svg{width:13px;height:13px}
+button.xcRow{display:flex;gap:10px;align-items:center;width:100%;min-height:0;padding:6px 4px;margin:2px 0;background:transparent;color:var(--ink);font-weight:500;font-size:14px;border:1px solid transparent;border-radius:12px;text-align:start}
+button.xcRow.on{border-color:var(--brand);background:color-mix(in srgb,var(--brand) 8%,transparent)}
+.xcRb{flex:1;min-width:0;display:block}.xcRb .top{display:flex;justify-content:space-between;gap:8px}.xcRn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.xcBar{display:block;height:7px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:4px}.xcBar span{display:block;height:100%;border-radius:4px}

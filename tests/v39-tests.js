@@ -33,7 +33,7 @@ const {chromium}=require('playwright'),path=require('path'),URL='file://'+path.j
  ok('שורה של בית עסק מוכר מציגה את הקטגוריה האחרונה (דלק), ו"אחר" לא נזכר',/דלק/.test(r.l[0])&&!/אחר/.test(r.l[1])&&r.mem,JSON.stringify(r));
  await p.fill('#imC','משרד');await p.evaluate(()=>impSave());
  r=await p.evaluate(()=>S.expenses.filter(x=>x.date>='2026-11-10').map(x=>[x.note,x.cat]));
- ok('בשמירה: בית עסק מוכר מקבל את הקטגוריה שלו, השאר את הקטגוריה שנבחרה',JSON.stringify(r)==='[["סונול 555","דלק"],["בזק","משרד"],["חדש","משרד"]]',JSON.stringify(r));
+ ok('בשמירה: בית עסק מוכר מקבל את הקטגוריה שלו (בזק לפי השם, מ-beta.40), השאר את הקטגוריה שנבחרה',JSON.stringify(r)==='[["סונול 555","דלק"],["בזק","טלפון ואינטרנט"],["חדש","משרד"]]',JSON.stringify(r));
  await p.evaluate(async()=>{await impFile(new File(['תאריך,שם בית העסק,סכום חיוב\n20/11/2026,סונול 9,90\n'],'mem2.csv'))});
  await p.evaluate(()=>{$('imMem').checked=false;document.querySelector('#imL input').click();$('imC').value='אחזקה';impSave()});
  ok('בלי הסימון "הקטגוריה מהפעם הקודמת": כל השורות מקבלות את הקטגוריה שנבחרה',await p.evaluate(()=>S.expenses.find(x=>x.note==='סונול 9').cat==='אחזקה'));
